@@ -1,0 +1,25 @@
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+
+# Generated manuscript PDFs in the project root.
+# Do not ignore image/*.pdf because those are source figures.
+/main.pdf
+/main_highlighted.pdf
+/main_diff.pdf
+
+# Editor/OS files
+*.tmp
+*.bak
+~$*
+.DS_Store
+Thumbs.db

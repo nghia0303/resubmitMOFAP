@@ -1,0 +1,60 @@
+% Cho một đồ thị vô hướng $G = (V, E)$ và một tập các giá trị tần số nguyên dương $F = \{\dots\}$. Trong đó:
+% \begin{itemize}
+%     \item $V = \{1, 2, \dots, n\}$ là tập các đỉnh.
+%     \item Mỗi đỉnh $i \in V$ có miền giá trị có thể nhận là $F_i \subseteq F$.
+%     \item $E$ là tập các cạnh, mỗi cạnh $(u, v) \in E$ được gán một trọng số nguyên dương $d_{u,v}$.
+% \end{itemize}
+
+% Một nghiệm của bài toán là cách gán tần số $f(u) \in F_u$ cho mỗi đỉnh $u \in V$ sao cho với mỗi cạnh $(u, v, d_{u,v}) \in E$, ta có điều kiện: $|f(u) - f(v)| > d_{u,v}$ hoặc $|f(u) - f(v)| = d_{u,v}$ . Mục tiêu là tìm giá trị nhỏ nhất của số các tần số khác nhau được sử dụng.
+% Dựa trên công trình nền tảng của Aardal và cộng sự \cite{Aardal2007}, bài toán gán tần số tối thiểu hóa (MO-FAP) có thể được mô hình hóa trực tiếp thông qua Quy hoạch tuyến tính nguyên (Integer Linear Programming - ILP). Gọi $G=(V, E)$ là đồ thị mạng lưới với $V$ là tập các đỉnh (trạm phát sóng) và $E$ là tập các cạnh thể hiện khả năng gây nhiễu tín hiệu. Gọi $F$ là tập các tần số vô tuyến khả dụng. Với hai tập biến quyết định nhị phân $x_{vf}$ (nhận giá trị 1 nếu gán tần số $f$ cho đỉnh $v$, và 0 nếu ngược lại) và $y_f$ (nhận giá trị 1 nếu tần số $f$ được kích hoạt trong mạng, và 0 nếu ngược lại), mô hình ILP của bài toán MO-FAP được phát biểu như sau:
+% \begin{align}
+%     \text{Minimize} \quad & \sum_{f \in F} y_f \label{eq:mo_obj} \\
+%     \text{Subject to} \quad 
+%     & \sum_{f \in F(v)} x_{vf} = m(v), && \forall v \in V \label{eq:mo_multiplicity} \\
+%     & x_{vf} \le y_f, && \forall v \in V, f \in F(v) \label{eq:mo_linking} \\
+%     & x_{vf} + x_{wg} \le 1, && \forall vw \in E, f \in F(v), g \in F(w) : p_{vw}(f,g) > p_{max} \label{eq:mo_interference} \\
+%     & x_{vf} \in \{0,1\}, && \forall v \in V, f \in F(v) \label{eq:mo_domain_x} \\
+%     & y_{f} \in \{0,1\}, && \forall f \in F \label{eq:mo_domain_y}
+% \end{align}
+% Trong đó, hàm mục tiêu (\ref{eq:mo_obj}) yêu cầu cực tiểu hóa tổng số lượng các tần số khác nhau được kích hoạt trên toàn bộ mạng lưới. Để đảm bảo năng lực truyền thông, ràng buộc yêu cầu tần số (\ref{eq:mo_multiplicity}) buộc hệ thống phải phân bổ chính xác $m(v)$ tần số (multiplicity) cho mỗi đỉnh $v$ từ tập các tần số hợp lệ $F(v)$ của nó. Tiếp theo, ràng buộc liên kết (\ref{eq:mo_linking}) đóng vai trò đánh dấu (node packing constraints), đảm bảo tính logic của hàm mục tiêu bằng cách bắt buộc biến $y_f$ phải nhận giá trị 1 nếu tần số $f$ được gán cho bất kỳ đỉnh $v$ nào ($x_{vf} = 1$). Nhằm duy trì chất lượng tín hiệu, hệ thống sử dụng ràng buộc chống nhiễu cốt lõi (\ref{eq:mo_interference}). Ràng buộc này quy định rằng đối với mỗi cặp thiết bị kề nhau $vw \in E$, nếu việc sử dụng đồng thời tần số $f$ tại đỉnh $v$ và tần số $g$ tại đỉnh $w$ tạo ra mức phạt $p_{vw}(f,g)$ vượt quá ngưỡng nhiễu tối đa cho phép $p_{max}$, thì tổ hợp gán này bị nghiêm cấm, tức là hai biến $x$ tương ứng không thể đồng thời bằng 1. Cuối cùng, các phương trình (\ref{eq:mo_domain_x}) và (\ref{eq:mo_domain_y}) xác định chặt chẽ miền giá trị nhị phân $\{0,1\}$ cho các biến quyết định của bài toán.
+
+\section{Introduction}
+
+Bài toán gán tần số (Frequency Assignment Problem - FAP) là một bài toán tối ưu hóa tổ hợp thuộc lớp NP-Hard, đóng vai trò nền tảng trong việc quản lý và cấp phép phổ tần vô tuyến. Trong những năm gần đây, sự bùng nổ của mạng 5G/6G và các thiết bị IoT đa kết nối đã đặt ra yêu cầu khắt khe về chất lượng dịch vụ (QoS), dẫn đến sự chú ý của cộng đồng nghiên cứu thường có xu hướng dịch chuyển sang bài toán tối thiểu hóa nhiễu (MI-FAP). Tuy nhiên, sự gia tăng mật độ trạm gốc khổng lồ này lại kích hoạt một thách thức còn khắc nghiệt hơn ở tầng vật lý: sự cạn kiệt tài nguyên phổ tần. Hiện nay, quyền sử dụng các dải phổ tần vô tuyến được đấu giá thương mại với chi phí lên tới hàng tỷ USD. Do đó, việc tìm ra cấu hình mạng yêu cầu sử dụng ít tần số phân biệt nhất — Bài toán gán tần số cực tiểu hóa số lượng (MO-FAP) — không chỉ giải quyết giới hạn phần cứng của các bộ thu phát, mà còn là một mệnh lệnh kinh tế sống còn (economic imperative) đối với các nhà cung cấp dịch vụ viễn thông. Hơn thế nữa, việc xác định chính xác giới hạn tần số tối thiểu từ MO-FAP chính là tiền đề toán học bắt buộc để thiết lập các không gian tìm kiếm khả thi cho các biến thể tối ưu nhiễu (MI-FAP) sau này.
+
+Sự phát triển mạnh mẽ của các phương pháp xấp xỉ trong hai thập kỷ qua, tiêu biểu như Tabu Search \cite{Alrajhi2016_Hybridized}, Ant Colony Optimization \cite{Alrajhi2023DynamicACO} hay Extremal Optimization \cite{Gomez2023MO}, đã giúp kết quả giải quyết MO-FAP dần hội tụ về các giới hạn rất nhỏ. Chính sự hội tụ này đã tạo ra một ảo giác (illusion) trong cộng đồng nghiên cứu rằng bài toán đã được giải quyết trọn vẹn. Tuy nhiên, một "khoảng trống" học thuật vẫn luôn tồn tại: các phương pháp metaheuristics hoàn toàn bất lực trong việc cung cấp chứng minh toán học (mathematical proof) để khẳng định lời giải tìm được đã thực sự là tối ưu toàn cục (global optimal) hay chưa. Suốt một thời gian dài, việc giải quyết chính xác và chứng minh tính vô nghiệm của MO-FAP trên các đồ thị quy mô lớn bị coi là bất khả thi về mặt tính toán do sự bùng nổ không gian trạng thái. Sự yếu kém này cũng thể hiện rõ ở các bộ giải Quy hoạch nguyên hỗn hợp (MIP) thương mại hiện tại, khi chúng thường xuyên bị mất phương hướng và tràn bộ nhớ (\texttt{OOM}) do sự lỏng lẻo của không gian nới lỏng tuyến tính sinh ra bởi hằng số \textit{Big-M} trong các ràng buộc khoảng cách chống nhiễu.
+
+Để phá vỡ rào cản này, bài báo đề xuất một phương pháp tiếp cận chính xác (exact approach) hoàn toàn mới dựa trên công nghệ Thỏa mãn Ràng buộc Logic (SAT). Khung thuật toán bao gồm hai đóng góp cốt lõi: 
+(i) Kỹ thuật mã hóa khoảng cách tiên tiến dựa trên thứ tự (Order-based SAT Encoding - PSE) giúp thiết lập ranh giới chặt chẽ, cho phép cắt tỉa triệt để không gian tìm kiếm vô nghiệm thông qua cơ chế lan truyền đơn vị; 
+(ii) Chiến lược tối ưu hóa hàm mục tiêu thông qua kiến trúc Incremental Sequential Counter kết hợp cơ chế truyền giả định (\textit{Assumptions}), qua đó loại bỏ hoàn toàn nút thắt về thời gian tái khởi động và giới hạn bộ nhớ.
+
+Đánh giá thực nghiệm toàn diện trên các bộ dữ liệu tiêu chuẩn (CALMA và DUTtest) khẳng định sự ưu việt tuyệt đối của mô hình. Phương pháp đề xuất không chỉ giải quyết và chứng minh thành công tính tối ưu toàn cục cho 100\% kịch bản thử nghiệm (35/35) mà còn thể hiện sức mạnh áp đảo khi so sánh với các phần mềm tối ưu hóa thương mại hàng đầu thế giới như Gurobi (MIP) và CPLEX (MIP/CP) về cả tốc độ hội tụ lẫn khả năng mở rộng.
+
+Phần còn lại của bài báo được tổ chức như sau: Phần \ref{sec:Problem_statement} phát biểu bài toán MO-FAP và các nghiên cứu liên quan. Phần \ref{sec:method} trình bày chi tiết kiến trúc mô hình SAT đề xuất. Phần \ref{sec:exp} phân tích các kết quả thực nghiệm và đối sánh với các bộ giải thương mại. Cuối cùng, Phần \ref{sec:conclusion} tóm tắt các đóng góp và đưa ra hướng phát triển tương lai.
+
+
+
+Để đánh giá độc lập hiệu quả của kiến trúc tối ưu hàm mục tiêu, chúng tôi cố định không gian tìm kiếm bằng cách dùng chung phương pháp mã hóa đề xuất (PSE) cho ràng buộc khoảng cách. Thực nghiệm tiến hành so sánh trực tiếp cơ chế Incremental Sequential Counter của chúng tôi với mã hóa Totalizer (tích hợp sẵn trong thư viện \texttt{PySAT}). Nhằm đảm bảo tính công bằng tuyệt đối, cả hai phương pháp đều được triển khai để kiểm soát cận trên ($UB$) thông qua cùng một cơ chế truyền giả định (\textit{Assumptions}). Thiết lập này giúp loại bỏ chi phí tái khởi động bộ giải, qua đó phản ánh chính xác tốc độ hội tụ và mức độ tiêu thụ bộ nhớ nội tại của từng cấu trúc mã hóa hàm đếm.
+
+Bảng \ref{tab:obj_optimization} trình bày so sánh hiệu năng giữa hai kiến trúc tối ưu hóa hàm đếm: Incremental Sequential Counter (đề xuất) và Totalizer (\texttt{PySAT}), trong đó cả hai phương pháp đều được điều khiển thông qua cơ chế \textit{Assumptions} để cập nhật cận trên $UB$.
+
+Kết quả cho thấy cả hai cấu trúc đều duy trì được tính đúng đắn tuyệt đối, chứng minh thành công trạng thái \texttt{OPT} và \texttt{INF} trên toàn bộ kịch bản mà không gặp phải giới hạn thời gian (Timeout). Tuy nhiên, về tổng thời gian giải, phương pháp Sequential Counter đề xuất cho thấy sự vượt trội đáng kể trên đa số các kịch bản thực nghiệm, đặc biệt là ở những đồ thị có độ phức tạp cao như CELAR 01 (106.23s so với 169.84s), CELAR 03 (70.40s so với 103.64s), GRAPH 01 (78.45s so với 118.58s) hay GRAPH 09 (62.56s so với 87.46s). 
+
+Sự chênh lệch hiệu năng này bắt nguồn từ bản chất của hai phương pháp. Vì cơ chế thông thường đòi hỏi phải thêm các mệnh đề ``at\_most\_k'' rất nặng cho từng lần giải. Cho nên mặc dù đã áp dụng một encoding rất tốt là ``Totalizer'' thì việc tái sử dụng các mệnh đề giữa các lần lặp là rất khó khăn, gây tốn kém tài nguyên tính toán. Ngược lại, phương pháp đề xuất chỉ yêu cầu thêm các mệnh đề ``at\_most\_k'' trong lần giải đầu tiên và có thể tái sử dụng các biến điều khiển đã được tạo ra các mệnh đề ``at\_most\_k'' trong các lần lặp sau này.
+% Sự chênh lệch hiệu năng này bắt nguồn từ bản chất cấu trúc tô-pô (topology) của hai mã hóa. Totalizer duy trì tính nhất quán cung (arc-consistency) cực kỳ tốt, giúp nó đạt thời gian tìm kiếm nhỉnh hơn ở một vài kịch bản quy mô nhỏ hoặc có giới hạn tần số lỏng lẻo (như GRAPH 03 hay GRAPH 04). Tuy nhiên, cái giá phải trả của Totalizer là cấu trúc cây nhị phân đồ sộ với độ phức tạp không gian lên tới $O(N \log N)$ hoặc $O(N^2)$. Khi $N$ và $UB$ càng lớn, lượng biến phụ và mệnh đề được sinh ra bởi Totalizer làm phình to bộ nhớ (bloating formula), gây trễ nặng nề (overhead) cho quá trình lan truyền đơn vị của bộ giải. Ngược lại, Sequential Counter duy trì một cấu trúc chuỗi đếm vô cùng tối giản với độ phức tạp tuyến tính $O(N \cdot k)$. Việc kết hợp Sequential Counter nhẹ bén này cùng cơ chế \textit{Assumptions} đã cho phép bộ giải CaDiCaL điều hướng không gian tìm kiếm với tốc độ tối ưu, hạn chế tối đa chi phí quản lý bộ nhớ và duy trì được hiệu suất cao ngay cả khi phải duyệt qua các mô hình mạng viễn thông cực lớn.
+
+
+% The empirical data strongly validates the comprehensive superiority of POSE over the direct encoding approach in terms of both execution time and overall convergence capability. 
+% In particular, POSE successfully solves and mathematically certifies all 35 instances within the 600-second limit, achieving an absolute success rate of 100\% \. 
+% In contrast, representing the distance constraints via discrete Boolean variables causes DSE to suffer from severe combinatorial explosions, completely exhausting the time limit (\texttt{TO}) on 9 instances. 
+% Specifically, on highly constrained instances such as the \texttt{C01}--\texttt{C03}, \texttt{C11}, and \texttt{G01}, \texttt{G02}, \texttt{G08}--\texttt{G10} series, DSE becomes entirely intractable, whereas POSE consistently excels at finding and proving the global optimal solutions. Even on instances where DSE manages to converge, POSE maintains a processing speed up to an order of magnitude faster, as highlighted by instance \texttt{T2.1} (2.74s vs. 42.02s) and \texttt{G14} (8.64s vs. 106.29s).
+
+% The structural power of the proposed encoding is further underscored by the infeasible instances (\texttt{INF}). To conclusively certify an \texttt{INF} status (i.e., \texttt{UNSAT}), the exact solver is compelled to exhaustively traverse and prune the entire search space. The results demonstrate that POSE reaches the \texttt{UNSAT} conclusion strictly faster than, or equivalently to, DSE in 100\% of these test cases. This consistent disparity serves as robust evidence for the efficacy of the proposed order-based distance encoding, demonstrating that the established auxiliary variables $g$ effectively accelerate the unit propagation process.
+
+% @inproceedings{Walser1996,
+%   author    = {Walser, J. P.},
+%   title     = {Feasible cellular frequency assignment using constraint programming abstractions},
+%   booktitle = {Proceedings of the workshop on constraint programming applications (CP96)},
+%   address   = {Cambridge, MA, USA},
+%   year      = {1996}
+% }
