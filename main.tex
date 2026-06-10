@@ -149,16 +149,26 @@ However, to overcome the combinatorial explosion inherent in DSE, Proposed Order
 
 \subsection{Domain Preprocessing}
 \label{subsec:preprocessing}
+Before constructing the optimization models, the initial frequency domains are first simplified by an arc-consistency preprocessing step \cite{Aardal2007, Dib2009}. 
+The purpose of this step is to remove a candidate frequency $f \in D_v$ whenever there exists an adjacent transmitter $w$ such that no frequency in $D_w$ can be paired with $f$ without violating the constraint on edge $vw$.
+In addition, pre-assigned transmitters are handled by setting their domains to $D_v=\{p_v\}$, where $p_v$ is the prescribed frequency of transmitter $v$.
+The output is a reduced set of domains, still denoted by $D_v$, which is used by the subsequent formulations and encodings.
 
-Prior to the SAT encoding, an arc-consistency preprocessing step \cite{Aardal2007, Dib2009} is applied to prune invalid frequencies from the initial domains $D_v$. Note that pre-assigned transmitters are natively handled since their domains are already initialized as singletons ($D_v = \{p_v\}$). For the remaining transmitters, their domains are iteratively filtered based on the network's interference constraints.
-
-Specifically, a frequency $f \in D_v$ is retained only if it is supported by at least one valid frequency $h \in D_w$ at the adjacent vertex. For interference and bidirectional constraints, the domain update rules are strictly tightened as formulated in~\eqref{eq:pre_ineq} and~\eqref{eq:pre_eq}, respectively.
+For each edge $vw$, a candidate frequency $f \in D_v$ is retained only when there exists a frequency $h \in D_w$ that satisfies the corresponding edge constraint.
+For interference constraints and bidirectional constraints, the corresponding domain filtering rules are defined in~\eqref{eq:pre_ineq} and~\eqref{eq:pre_eq}, respectively.
 
 \begin{align}
-    D_v &\leftarrow \{ f \in D_v \mid \exists h \in D_w : |f - h| > d_{vw} \}, \label{eq:pre_ineq} \\
-    D_v &\leftarrow \{ f \in D_v \mid \exists h \in D_w : |f - h| = d_{vw} \}. \label{eq:pre_eq}
+    D_v &\leftarrow \{ f \in D_v \mid \exists h \in D_w : |f - h| > d_{vw} \},
+    \notag \\
+    &\quad \forall vw \in E_{ineq} \label{eq:pre_ineq} \\
+    D_v &\leftarrow \{ f \in D_v \mid \exists h \in D_w : |f - h| = d_{vw} \},
+    \notag \\
+    &\quad \forall vw \in E_{eq} \label{eq:pre_eq}
 \end{align}
-These reduction rules are applied bidirectionally across all edges and iteratively repeated until a fixed point is reached (i.e., no further domain reductions are possible). By eliminating infeasible frequencies early, this standard arc-consistency procedure drastically shrinks the search space, which subsequently minimizes the number of Boolean variables and clauses generated in the SAT model, accelerating the overall solving process.
+ 
+Removing a frequency by the preprocessing rules does not remove any feasible solution of the original problem. Consider a transmitter-frequency pair $(v,f)$ with $f \in D_v$. 
+If $f$ does not satisfy the retaining condition in either~\eqref{eq:pre_ineq} or~\eqref{eq:pre_eq} for an edge $vw$, then no frequency in $D_w$ can be assigned together with $f$ while satisfying the constraint on that edge. 
+Therefore, $f$ cannot be assigned to $v$ in any feasible solution. It is thus safe to remove $f$ from $D_v$ before constructing the optimization models.
 
 \subsection{Direct SAT Encoding}
 \label{subsec:sat_encoding}
