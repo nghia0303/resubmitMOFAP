@@ -23,6 +23,8 @@
 \hyphenation{op-tical net-works semi-conduc-tor IEEE-Xplore}
 \usepackage[utf8]{inputenc}
 \usepackage[T5]{fontenc}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
 \begin{document}
 
 % \title{Certifying optimality of Min-order FAP by SAT solving}
@@ -105,47 +107,54 @@ Let $d_{vw}$ denote the required frequency separation distance between two adjac
 To provide a rigorous mathematical definition of the MO-FAP, we present an Integer Linear Programming (ILP) formulation based on the standard MO-FAP modeling framework in the literature \cite{Aardal2007}.
 Let $x_{vf} \in \{0, 1\}$ be a binary decision variable that takes the value 1 if frequency $f \in D_v$ is assigned to transmitter $v$, and 0 otherwise. 
 Additionally, let $y_f \in \{0, 1\}$ be a variable that takes the value 1 if frequency $f \in D$ is utilized by at least one transmitter in the network. 
-The MO-FAP is explicitly formulated by the objective function~\eqref{eq:ilp_obj} and constraints~\eqref{eq:ilp_domain}--\eqref{eq:ilp_bin}.
+The MO-FAP is explicitly formulated by the objective function~\eqref{eq:ilp_obj} and constraints~\eqref{eq:ilp_domain}--\eqref{eq:ilp_ybin}.
 \begin{align} 
     & \text{Minimize} \quad \sum_{f \in D} y_f \label{eq:ilp_obj} \\
-    & \text{Subject to} \notag \\
-    & \sum_{f \in D_v} x_{vf} = 1, \quad \forall v \in V \label{eq:ilp_domain} \\
-    & x_{vf} \le y_f, \quad \forall v \in V, f \in D_v \label{eq:ilp_link} \\
-    & x_{vf} + \sum_{h \in D_w : |f - h| \neq d_{vw}} x_{wh} \le 1, \forall vw \in E_{eq}, f \in D_v \label{eq:ilp_exact} \\
-    & x_{vf} + \sum_{h \in D_w : |f - h| \le d_{vw}} x_{wh} \le 1, \forall vw \in E_{ineq}, f \in D_v \label{eq:ilp_ineq} \\
-    & x_{vf} \in \{0, 1\}, \forall v \in V, f \in D_v; \quad y_f \in \{0, 1\}, \quad \forall f \in D \label{eq:ilp_bin}
-\end{align}
-In this formulation, the objective function~\eqref{eq:ilp_obj} minimizes the total number of utilized frequencies. Constraint~\eqref{eq:ilp_domain} ensures that exactly one valid frequency is assigned per transmitter; notably, any hardware-level pre-assignments are seamlessly handled by naturally restricting the initial domain $D_v$ to a single frequency. Constraint~\eqref{eq:ilp_link} logically links the local assignments $x_{vf}$ to the global usage variables $y_f$. 
-% Crucially, telecommunication interference is modeled via an aggregated packing formulation. 
-% For bidirectional constraints with exact distances ($vw \in E_{eq}$) and interference constraints ($vw \in E_{ineq}$), constraints~\eqref{eq:ilp_exact} and~\eqref{eq:ilp_ineq} aggregate all conflicting frequencies $h \in D_w$ relative to $f \in D_v$ into a single summation. If $x_{vf} = 1$, the collective sum of these invalid assignments is strictly forced to 0. 
-Interference is modeled through aggregated packing constraints: for each pair $vw \in E_{eq}$ or $vw \in E_{ineq}$, constraints~\eqref{eq:ilp_exact} and~\eqref{eq:ilp_ineq} ensure that if $x_{vf} = 1$, then all conflicting assignments $x_{wh}$ (based on the required separation) are forbidden by forcing their sum to zero.
-\subsection{Related Work}
-% Research on the MO-FAP has attracted widespread attention over the past decades. The evolution of solution techniques for this NP-hard problem can be broadly classified into two main research streams: exact methods and approximation algorithms.
-The MO-FAP has been extensively studied over the past decades. Existing solution approaches can be broadly categorized into two main classes: exact methods and approximation algorithms.
+        & \text{Subject to} \notag \\
+            & \sum_{f \in D_v} x_{vf} = 1, \quad \forall v \in V \label{eq:ilp_domain} \\
+                & x_{vf} \le y_f, \quad \forall v \in V, f \in D_v \label{eq:ilp_link} \\
+                    & x_{vf} + \sum_{h \in D_w : |f - h| \neq d_{vw}} x_{wh} \le 1, \forall vw \in E_{eq}, f \in D_v \label{eq:ilp_exact} \\
+                        & x_{vf} + \sum_{h \in D_w : |f - h| \le d_{vw}} x_{wh} \le 1, \forall vw \in E_{ineq}, f \in D_v \label{eq:ilp_ineq} \\
+                            % & x_{vf} \in \{0, 1\}, \forall v \in V, f \in D_v; \quad y_f \in \{0, 1\}, \quad \forall f \in D \label{eq:ilp_bin}
+                                & x_{vf} \in \{0, 1\}, \quad \forall v \in V,\; f \in D_v \label{eq:ilp_xbin} \\
+                                    & y_f \in \{0, 1\}, \quad \forall f \in D \label{eq:ilp_ybin}
+                                    \end{align}
+                                    In this formulation, the objective function~\eqref{eq:ilp_obj} minimizes the total number of utilized frequencies. Constraint~\eqref{eq:ilp_domain} ensures that exactly one valid frequency is assigned per transmitter; notably, any hardware-level pre-assignments are seamlessly handled by naturally restricting the initial domain $D_v$ to a single frequency. Constraint~\eqref{eq:ilp_link} logically links the local assignments $x_{vf}$ to the global usage variables $y_f$. 
+                                    % Crucially, telecommunication interference is modeled via an aggregated packing formulation. 
+                                    % For bidirectional constraints with exact distances ($vw \in E_{eq}$) and interference constraints ($vw \in E_{ineq}$), constraints~\eqref{eq:ilp_exact} and~\eqref{eq:ilp_ineq} aggregate all conflicting frequencies $h \in D_w$ relative to $f \in D_v$ into a single summation. If $x_{vf} = 1$, the collective sum of these invalid assignments is strictly forced to 0. 
+                                    Interference is modeled through aggregated packing constraints: for each pair $vw \in E_{eq}$ or $vw \in E_{ineq}$, constraints~\eqref{eq:ilp_exact} and~\eqref{eq:ilp_ineq} ensure that if $x_{vf} = 1$, then all conflicting assignments $x_{wh}$ (based on the required separation) are forbidden by forcing their sum to zero.
+                                    \subsection{Related Work}
+                                    % Research on the MO-FAP has attracted widespread attention over the past decades. The evolution of solution techniques for this NP-hard problem can be broadly classified into two main research streams: exact methods and approximation algorithms.
+                                    The MO-FAP has been extensively studied over the past decades. Existing solution approaches can be broadly categorized into two main classes: exact methods and approximation algorithms.
 
-The first category encompasses studies dedicated to formalizing mathematical models and developing exact solution methods. The pioneering work of Baybars \cite{Baybars1982} laid the earliest mathematical foundation by formulating the assignment of broadcasting frequencies as a 0-1 integer programming problem. Driven by this foundational conceptualization and the pursuit of global optimality, a diverse array of exact algorithms was actively explored in the following decades. These efforts include branch-and-cut techniques \cite{Aardal1996, Fischetti2000}, partial constraint satisfaction formulations related to FAP \cite{Koster1998}, enumerative algorithms \cite{Mannino2003}, and graph-theoretic approaches \cite{Kral2005}. A comprehensive synthesis of these milestones, which unified various FAP variants and established the core ILP models, was later provided in the classic survey by Aardal et al. \cite{Aardal2007}. 
-% Subsequent efforts in this exact domain also introduced exponential-time dynamic programming \cite{Uyanik2014}. However, despite their rigorous mathematical ability to guarantee global optimal solutions, a shared bottleneck among all these exact solvers is their inherent exponential time complexity. 
-% When dealing with the combinatorial explosion of large-scale telecommunication networks, traditional exact methods frequently suffer from computationally prohibitive run-times and memory exhaustion, making them practical only for small-to-medium instances \cite{Aardal2007,Mahmoudi2023}.
-Subsequent efforts in this exact domain, including Dynamic Programming approaches \cite{Uyanik2014}, remain fundamentally bottlenecked by the inherent combinatorial explosion of the problem. 
-Consequently, the exponential growth in the search space causes severe memory exhaustion and scalability issues, restricting these exact methods to small-scale instances and causing even modern commercial solvers to struggle with heavily constrained interference graphs \cite{Aardal2007, Uyanik2014}.
+                                    The first category encompasses studies dedicated to formalizing mathematical models and developing exact solution methods. The pioneering work of Baybars \cite{Baybars1982} laid the earliest mathematical foundation by formulating the assignment of broadcasting frequencies as a 0-1 integer programming problem. Driven by this foundational conceptualization and the pursuit of global optimality, a diverse array of exact algorithms was actively explored in the following decades. These efforts include branch-and-cut techniques \cite{Aardal1996, Fischetti2000}, partial constraint satisfaction formulations related to FAP \cite{Koster1998}, enumerative algorithms \cite{Mannino2003}, and graph-theoretic approaches \cite{Kral2005}. A comprehensive synthesis of these milestones, which unified various FAP variants and established the core ILP models, was later provided in the classic survey by Aardal et al. \cite{Aardal2007}. 
+                                    % Subsequent efforts in this exact domain also introduced exponential-time dynamic programming \cite{Uyanik2014}. However, despite their rigorous mathematical ability to guarantee global optimal solutions, a shared bottleneck among all these exact solvers is their inherent exponential time complexity. 
+                                    % When dealing with the combinatorial explosion of large-scale telecommunication networks, traditional exact methods frequently suffer from computationally prohibitive run-times and memory exhaustion, making them practical only for small-to-medium instances \cite{Aardal2007,Mahmoudi2023}.
+                                    Subsequent efforts in this exact domain, including Dynamic Programming approaches \cite{Uyanik2014}, remain fundamentally bottlenecked by the inherent combinatorial explosion of the problem. 
+                                    Consequently, the exponential growth in the search space causes severe memory exhaustion and scalability issues, restricting these exact methods to small-scale instances and causing even modern commercial solvers to struggle with heavily constrained interference graphs \cite{Aardal2007, Uyanik2014}.
 
-Faced with these severe scalability limitations, the research community heavily shifted its focus toward approximation algorithms. 
-% A notable milestone during this transition is the work of Dib et al. \cite{Dib2009}, wherein the authors conducted comprehensive empirical evaluations and cross-referenced their findings with previous milestones established on the FAP web repository. 
-A notable milestone during this transition is the work of Dib et al. \cite{Dib2009}, who proposed a hybrid optimization method combining constraint propagation, nogood management, and Tabu Search for the frequency assignment problem.
-Following this, the field witnessed a proliferation of heuristic and metaheuristic methods to handle large-scale networks.  
-This era was marked by extensive contributions from Alrajhi and colleagues, who consistently proposed algorithms based on Tabu Search hybridized with various neighborhood structures \cite{Alrajhi2016_Hybridized}, dynamic multiple neighborhood structures \cite{Alrajhi2023Neighborhood}, variations of Ant Colony Optimization (including DACO) \cite{Alrajhi2023AntMetaheuristic, Alrajhi2023DynamicACO}, and dynamic hyper-heuristics \cite{Alrajhi2023DynamicHyper}.
-Recently, Gomez and Ayala \cite{Gomez2023MO} successfully applied the Extremal Optimization (EO) algorithm to the MO-FAP variant, performing a comprehensive cross-comparison between Aardal's original models \cite{Aardal2007} and the empirical results of Alrajhi's group.
+                                    Faced with these severe scalability limitations, the research community heavily shifted its focus toward approximation algorithms. 
+                                    % A notable milestone during this transition is the work of Dib et al. \cite{Dib2009}, wherein the authors conducted comprehensive empirical evaluations and cross-referenced their findings with previous milestones established on the FAP web repository. 
+                                    A notable milestone during this transition is the work of Dib et al. \cite{Dib2009}, who proposed a hybrid optimization method combining constraint propagation, nogood management, and Tabu Search for the frequency assignment problem.
+                                    Following this, the field witnessed a proliferation of heuristic and metaheuristic methods to handle large-scale networks.  
+                                    This era was marked by extensive contributions from Alrajhi and colleagues, who consistently proposed algorithms based on Tabu Search hybridized with various neighborhood structures \cite{Alrajhi2016_Hybridized}, dynamic multiple neighborhood structures \cite{Alrajhi2023Neighborhood}, variations of Ant Colony Optimization (including DACO) \cite{Alrajhi2023AntMetaheuristic, Alrajhi2023DynamicACO}, and dynamic hyper-heuristics \cite{Alrajhi2023DynamicHyper}.
+                                    Recently, Gomez and Ayala \cite{Gomez2023MO} successfully applied the Extremal Optimization (EO) algorithm to the MO-FAP variant, performing a comprehensive cross-comparison between Aardal's original models \cite{Aardal2007} and the empirical results of Alrajhi's group.
 
-% Overall, while the research community has built a rich algorithmic ecosystem for the MO-FAP, several critical gaps remain. First, a lack of standardization in evaluation environments particularly the reliance on maximum iterations rather than strict execution time limits as seen in \cite{Gomez2023MO} compromises the objective assessment of solver architectures. Second, and most importantly, while modern metaheuristics can rapidly reach theoretical lower bounds on large networks, their approximate nature inherently lacks the mathematical tools to certify global optimality. Conversely, traditional exact methods (ILP, CP, Graph Theory, DP) still struggle with scalability and memory exhaustion \cite{Aardal2007,Mahmoudi2023}. These limitations necessitate a fundamentally new encoding architecture such as the Order-based SAT approach proposed in this paper to successfully bridge the gap between strict global optimality certification and computational scalability.
-Overall, although a rich set of solution methods has been developed for the MO-FAP, several limitations remain. First, the lack of standardized evaluation protocols, particularly the use of iteration-based stopping criteria instead of runtime limits as in \cite{Gomez2023MO} hinders fair comparison between solvers. Second, while metaheuristics can quickly reach high-quality solutions on large instances, they cannot certify global optimality. In contrast, traditional exact methods (ILP, CP, DP) often suffer from scalability and memory limitations \cite{Aardal2007,Mahmoudi2023}. 
-Recently, SAT-based approaches have emerged as a powerful paradigm for exact method in combinatorial problems \cite{fichte2023silent}, including various graph labeling problems \cite{glorian2019incremental, faber2024sat}, where they have demonstrated strong performance in both scalability and optimality certification. Motivated by these advances, this work proposes an order-based SAT encoding to bridge the gap between exact optimality guarantees and computational efficiency for the MO-FAP.
+                                    % Overall, while the research community has built a rich algorithmic ecosystem for the MO-FAP, several critical gaps remain. First, a lack of standardization in evaluation environments particularly the reliance on maximum iterations rather than strict execution time limits as seen in \cite{Gomez2023MO} compromises the objective assessment of solver architectures. Second, and most importantly, while modern metaheuristics can rapidly reach theoretical lower bounds on large networks, their approximate nature inherently lacks the mathematical tools to certify global optimality. Conversely, traditional exact methods (ILP, CP, Graph Theory, DP) still struggle with scalability and memory exhaustion \cite{Aardal2007,Mahmoudi2023}. These limitations necessitate a fundamentally new encoding architecture such as the Order-based SAT approach proposed in this paper to successfully bridge the gap between strict global optimality certification and computational scalability.
+                                    Overall, although a rich set of solution methods has been developed for the MO-FAP, several limitations remain. First, the lack of standardized evaluation protocols, particularly the use of iteration-based stopping criteria instead of runtime limits as in \cite{Gomez2023MO} hinders fair comparison between solvers. Second, while metaheuristics can quickly reach high-quality solutions on large instances, they cannot certify global optimality. In contrast, traditional exact methods (ILP, CP, DP) often suffer from scalability and memory limitations \cite{Aardal2007,Mahmoudi2023}. 
+                                    Recently, SAT-based approaches have emerged as a powerful paradigm for exact method in combinatorial problems \cite{fichte2023silent}, including various graph labeling problems \cite{glorian2019incremental, faber2024sat}, where they have demonstrated strong performance in both scalability and optimality certification. Motivated by these advances, this work proposes an order-based SAT encoding to bridge the gap between exact optimality guarantees and computational efficiency for the MO-FAP.
 
 \section{Proposed Exact Approach}
 \label{sec:method}
+% This section details the proposed SAT-based methodology for solving the MO-FAP.
+% First, a domain preprocessing technique is applied to shrink the initial search space (Section~\ref{subsec:preprocessing}). 
+% Next, to encode the feasibility space defined by constraints~\eqref{eq:ilp_domain}--\eqref{eq:ilp_ybin} in the ILP model, we initially present a baseline Direct SAT Encoding (DSE) detailed in Section~\ref{subsec:sat_encoding}.
+% However, to overcome the combinatorial explosion inherent in DSE, Proposed Order-based SAT Encoding (POSE) is subsequently introduced as an advanced architecture that fundamentally improves the interference constraints formulation (Section~\ref{subsec:order_encoding}). Finally, the optimization of the objective function~\eqref{eq:ilp_obj} is addressed using an Incremental SAT strategy (Section~\ref{subsec:incremental_sat}).
 This section details the proposed SAT-based methodology for solving the MO-FAP.
-First, a domain preprocessing technique is applied to shrink the initial search space (Section~\ref{subsec:preprocessing}). 
-Next, to encode the feasibility space defined by constraints~\eqref{eq:ilp_domain}--\eqref{eq:ilp_bin} in the ILP model, we initially present a baseline Direct SAT Encoding (DSE) detailed in Section~\ref{subsec:sat_encoding}.
-However, to overcome the combinatorial explosion inherent in DSE, Proposed Order-based SAT Encoding (POSE) is subsequently introduced as an advanced architecture that fundamentally improves the interference constraints formulation (Section~\ref{subsec:order_encoding}). Finally, the optimization of the objective function~\eqref{eq:ilp_obj} is addressed using an Incremental SAT strategy (Section~\ref{subsec:incremental_sat}).
+First, a domain preprocessing technique is applied to shrink the initial search space (Section~\ref{subsec:preprocessing}).
+Next, we present a baseline Direct SAT Encoding (DSE) for the assignment, exact-distance, and interference constraints~\eqref{eq:ilp_domain},~\eqref{eq:ilp_exact}, and~\eqref{eq:ilp_ineq} (Section~\ref{subsec:sat_encoding}).
+To overcome the combinatorial explosion inherent in the direct pairwise interference encoding, the Proposed Order-based SAT Encoding (POSE) is then introduced for the interference constraints (Section~\ref{subsec:order_encoding}).
+Finally, the min-order objective~\eqref{eq:ilp_obj} is handled through active-frequency variables and an incremental SAT strategy (Section~\ref{subsec:incremental_sat}).
 
 \subsection{Domain Preprocessing}
 \label{subsec:preprocessing}
@@ -153,6 +162,7 @@ Before constructing the optimization models, the initial frequency domains are f
 The purpose of this step is to remove a candidate frequency $f \in D_v$ whenever there exists an adjacent transmitter $w$ such that no frequency in $D_w$ can be paired with $f$ without violating the constraint on edge $vw$.
 In addition, pre-assigned transmitters are handled by setting their domains to $D_v=\{p_v\}$, where $p_v$ is the prescribed frequency of transmitter $v$.
 The output is a reduced set of domains, still denoted by $D_v$, which is used by the subsequent formulations and encodings.
+If this preprocessing step makes some domain $D_v$ empty, then no feasible assignment can satisfy constraint~\eqref{eq:ilp_domain}, which requires each transmitter to be assigned exactly one frequency. Therefore, the instance is declared infeasible before any SAT or ILP model is constructed. In the subsequent formulations, each remaining domain $D_v$ is thus assumed to be nonempty.
 
 For each edge $vw$, a candidate frequency $f \in D_v$ is retained only when there exists a frequency $h \in D_w$ that satisfies the corresponding edge constraint.
 For interference constraints and bidirectional constraints, the corresponding domain filtering rules are defined in~\eqref{eq:pre_ineq} and~\eqref{eq:pre_eq}, respectively.
@@ -191,23 +201,74 @@ Finally, interference constraints (which correspond to the binary packing constr
     & \quad \forall j' \in \{1, \dots, |D_w|\} : |D_{v,j} - D_{w,j'}| \le d_{vw} \label{eq:sat_ineq}
 \end{align}
 
+Thus, the Boolean variables $b_{v,j}$ and constraints~\eqref{eq:sat_domain}--\eqref{eq:sat_ineq} ensure that every satisfying assignment of the DSE formula corresponds to a feasible frequency assignment satisfying constraints~\eqref{eq:ilp_domain},~\eqref{eq:ilp_exact}, and~\eqref{eq:ilp_ineq}. Conversely, any frequency assignment satisfying these constraints can be translated into a satisfying assignment of the DSE formula. This correctness property is formalized in Proposition~\ref{prop:dse_correctness}.
+
+\begin{proposition}
+\label{prop:dse_correctness}
+For the preprocessed domains, every satisfying assignment of the DSE constraints~\eqref{eq:sat_domain}--\eqref{eq:sat_ineq} induces a frequency assignment satisfying constraints~\eqref{eq:ilp_domain},~\eqref{eq:ilp_exact}, and~\eqref{eq:ilp_ineq}. Conversely, every frequency assignment satisfying these constraints induces a satisfying assignment of the DSE constraints.
+\end{proposition}
+
+\begin{IEEEproof}
+Consider the direct mapping in which $b_{v,j}$ is true exactly when transmitter $v$ is assigned frequency $D_{v,j}$ ($x_{v,D_{v,j}}=1$ in the ILP formulation).
+Suppose first that the DSE constraints have a satisfying assignment. By~\eqref{eq:sat_domain}, exactly one $b_{v,j}$ is true for each transmitter $v$, so the induced frequency assignment selects exactly one frequency for each transmitter and satisfies~\eqref{eq:ilp_domain}. For every edge $vw\in E_{eq}$, constraint~\eqref{eq:sat_exact} states that once $v$ selects $D_{v,j}$, transmitter $w$ must select one of the frequencies $D_{w,j'}$ whose distance from $D_{v,j}$ is exactly $d_{vw}$. Therefore, the selected pair on edge $vw$ satisfies~\eqref{eq:ilp_exact}. For every edge $vw\in E_{ineq}$, constraint~\eqref{eq:sat_ineq} adds a conflict clause for each pair with $|D_{v,j}-D_{w,j'}|\le d_{vw}$, preventing both variables in any such pair from being true simultaneously. Hence, every selected pair has distance greater than $d_{vw}$, so~\eqref{eq:ilp_ineq} holds.
+
+Conversely, let a frequency assignment satisfy~\eqref{eq:ilp_domain},~\eqref{eq:ilp_exact}, and~\eqref{eq:ilp_ineq}. 
+For each transmitter $v$, let $j$ be the index such that the assigned frequency of $v$ is $D_{v,j}$.
+The corresponding assignment of the DSE variables sets $b_{v,j}$ to true and sets $b_{v,k}$ to false for all $k\neq j$.
+Since the assignment selects exactly one frequency for each transmitter, the DSE exactly-one constraint~\eqref{eq:sat_domain} is satisfied.
+For every exact-distance edge $vw\in E_{eq}$, constraint~\eqref{eq:ilp_exact} forbids all pairs whose distance is not $d_{vw}$. Therefore, if a pair is selected by the frequency assignment, its distance must be exactly $d_{vw}$, and the corresponding implication in~\eqref{eq:sat_exact} is satisfied.
+Similarly, for every interference edge $vw\in E_{ineq}$, constraint~\eqref{eq:ilp_ineq} forbids all pairs whose distance is at most $d_{vw}$. Therefore, no forbidden pair in~\eqref{eq:sat_ineq} is selected simultaneously. Hence, all DSE constraints are satisfied.
+\end{IEEEproof}
+
 \subsection{Proposed Order-Based SAT Encoding}
 \label{subsec:order_encoding}
-Although DSE provides an intuitive formulation, expressing the interference constraints~\eqref{eq:sat_ineq} in this manner typically leads to a combinatorial explosion of conflict clauses. To overcome this limitation, we build on the standard Order Encoding paradigm \cite{Petke2011Order_encoding} and derive a problem-specific interference formulation for MO-FAP. The contribution of POSE is not the order variables themselves, but the use of boundary indices to encode each forbidden interval with a small number of implications instead of enumerating all pairwise conflicts of the DSE model.
+Although DSE provides an intuitive formulation, expressing the interference constraints~\eqref{eq:sat_ineq} in this manner may require many clauses, since each forbidden frequency pair is encoded separately.
+To overcome this limitation, POSE uses order variables following order encoding~\cite{Crawford1994Scheduling,Tamura2009OrderEncoding,Petke2011Order_encoding,Abio2014LinearSAT} to reformulate the MO-FAP interference constraints without encoding each forbidden frequency pair separately.
+Note that this work does not introduce a new order encoding.
+The main contribution of POSE is the adaptation of order variables to the interference constraints of MO-FAP. It links these variables with $b_{v,j}$ and uses the resulting representation to encode forbidden frequency intervals as an alternative to the pairwise formulation used in DSE.
 
-Specifically, while retaining the Boolean variables $b_{v,j}$ and the preprocessed domain $D_v$, we introduce a supplementary set of Boolean variables, denoted as $g_{v,j}$ (standing for ``greater than or equal to''). We define $g_{v,j} = \text{True}$ if and only if vertex $v$ is assigned a frequency index that is greater than or equal to $j$ within its sorted domain $D_v$. These variables follow the standard order encoding semantics. To enforce their logical consistency,~\eqref{eq:g_right_bound}--\eqref{eq:g_propagation} are constructed, where $|D_v|$ denotes the total number of candidate frequencies in the domain of vertex $v$:
+Specifically, while retaining the Boolean variables $b_{v,j}$ and the preprocessed domain $D_v$, POSE introduces a supplementary set of Boolean variables, denoted by $g_{v,j}$.
+The domain $D_v$ is sorted in increasing order, and $g_{v,j}$ represents whether the selected frequency index of vertex $v$ is greater than or equal to $j$.
+The variables $b_{v,j}$ and $g_{v,j}$ are linked by constraints~\eqref{eq:g_b_connect}--\eqref{eq:g_propagation}, where $|D_v|$ denotes the number of candidate frequencies in the domain of vertex $v$.
+These constraints also enforce that exactly one frequency index is selected for each transmitter.
+Lemma~\ref{lem:order_variable_semantics} formalizes this relationship between the selected $b$ variable and the corresponding $g$ variables.
+
 \begin{align}
+    & b_{v,j} \leftrightarrow g_{v,j} \wedge \neg g_{v,j+1}, \quad \forall v \in V, \forall j \in \{1, \dots, |D_v|-1\} \label{eq:g_b_connect} \\
     & b_{v,|D_v|} \leftrightarrow g_{v,|D_v|}, \quad \forall v \in V \label{eq:g_right_bound} \\
-    & b_{v,j} \leftrightarrow g_{v,j} \wedge \neg g_{v,j+1}, \forall v \in V, \forall j \in \{1, \dots, |D_v|-1\} \label{eq:g_b_connect} \\
     & g_{v,1}, \quad \forall v \in V \label{eq:g_left_bound} \\
     & g_{v,j} \rightarrow g_{v,j-1}, \quad \forall v \in V, \forall j \in \{2, \dots, |D_v|\} \label{eq:g_propagation}
 \end{align}
 
+\begin{lemma}
+\label{lem:order_variable_semantics}
+For each transmitter $v$, constraints~\eqref{eq:g_b_connect}--\eqref{eq:g_propagation} enforce exactly one true variable among $\{b_{v,j}\mid j\in\{1,\ldots,|D_v|\}\}$. If $b_{v,t}$ is this true variable, then $g_{v,j}$ is true if and only if the selected frequency index $t$ is greater than or equal to $j$ in the sorted domain $D_v$.
+\end{lemma}
+
+
+
+\begin{IEEEproof}
+Let $n=|D_v|$ and consider any assignment satisfying~\eqref{eq:g_b_connect}--\eqref{eq:g_propagation}. By~\eqref{eq:g_left_bound}, $g_{v,1}$ is true. Constraint~\eqref{eq:g_propagation} implies that if $g_{v,j}$ is true, then all variables $g_{v,k}$ with $k<j$ are also true. Therefore, the true $g$ variables form a nonempty prefix of the ordered domain.
+
+First, suppose that there exists an index $r$ such that $g_{v,r}$ is false, and let $r$ be the smallest such index. Then $r>1$. Set $t=r-1$. By the choice of $r$, $g_{v,t}$ is true and $g_{v,t+1}$ is false. Substituting $j=t$ into~\eqref{eq:g_b_connect} gives $b_{v,t}\leftrightarrow(g_{v,t}\wedge\neg g_{v,t+1})$, so $b_{v,t}$ is true.
+For any $k<t$, $g_{v,k+1}$ is true, so~\eqref{eq:g_b_connect} makes $b_{v,k}$ false. For any $t<k<n$, $g_{v,k}$ is false, so~\eqref{eq:g_b_connect} also makes $b_{v,k}$ false. Since $g_{v,n}$ is false in this case,~\eqref{eq:g_right_bound} makes $b_{v,n}$ false. Hence, exactly one $b$ variable is true, namely $b_{v,t}$. Moreover, $g_{v,j}$ is true exactly for the indices $j\le t$, which is equivalent to $t\ge j$.
+
+It remains to consider the case in which no $g_{v,j}$ is false. Then all variables $g_{v,j}$ are true. By~\eqref{eq:g_right_bound}, $b_{v,n}$ is true. For every $k<n$, $g_{v,k+1}$ is true, so~\eqref{eq:g_b_connect} makes $b_{v,k}$ false. Hence, exactly one $b$ variable is true, namely $b_{v,n}$. In this case the selected index is $t=n$, and $g_{v,j}$ is true for every valid index $j$, which is equivalent to $t\ge j$.
+\end{IEEEproof}
+
+% TODO: Revise the L/R boundary presentation.
+% 1) Add figure/text cases for D_w entirely left or right of the forbidden interval; these cases generate no POSE constraint.
+% 2) State that an empty D_w after preprocessing means infeasibility and no SAT encoding is constructed.
+% 3) State that if all frequencies in D_w are inside the forbidden interval, D_{v,j} is removed from D_v by preprocessing.
+% 4) Define L and R only when the corresponding safe side exists; avoid argmax/argmin over an empty set.
+% 5) Split eqs. forbid_1--forbid_3 into three separate cases and state which boundary index exists in each case.
 Subsequently, the order variables $g$ are utilized to efficiently reformulate the interference constraints. When vertex $v$ is assigned the frequency $D_{v,j}$ (i.e., $b_{v,j} = \text{True}$), it explicitly creates a forbidden frequency interval $[D_{v,j} - d_{vw}, D_{v,j} + d_{vw}]$ for its adjacent vertex $w$. To formulate the constraints, we first identify the safe boundary indices $L$ and $R$ within $D_w$:
 \begin{align}
     L &= \operatorname{arg\,max}\limits_{k} \{ k \mid D_{w,k} < D_{v,j} - d_{vw} \}, \label{eq:forbid_L} \\
     R &= \operatorname{arg\,min}\limits_{k} \{ k \mid D_{w,k} > D_{v,j} + d_{vw} \}. \label{eq:forbid_R}
 \end{align}
+
+Subsequently, the order variables $g$ are used to reformulate the interference constraints. When transmitter $v$ is assigned the frequency $D_{v,j}$ (i.e., $b_{v,j}=\text{True}$), it induces the forbidden interval $[D_{v,j}-d_{vw},\,D_{v,j}+d_{vw}]$ for its adjacent transmitter $w$. At this stage, the preprocessed domain $D_w$ is nonempty. Relative to this forbidden interval, the ordered domain $D_w$ may lie entirely on the left, overlap on the left, extend on both sides, overlap on the right, or lie entirely on the right. If $D_w$ lies entirely on the left or entirely on the right, then every value in $D_w$ already satisfies the interference constraint, and no additional POSE implication is required. If all values in $D_w$ fall inside the forbidden interval, then $D_{v,j}$ has no compatible value in $D_w$ and is therefore removed from $D_v$ during preprocessing. The remaining overlapping cases are encoded by boundary indices on the safe side(s) of $D_w$ outside the forbidden interval.
 
 Depending on the relative position between the forbidden interval and the domain bounds of $D_w$, these interference constraints are formulated into three distinct cases~\eqref{eq:forbid_1}--\eqref{eq:forbid_3}. A fourth case involving the entire $D_w$ falling within the forbidden interval is strictly impossible, as such infeasible frequencies were already eliminated during domain preprocessing.
 \begin{align}
@@ -247,6 +308,8 @@ Depending on the relative position between the forbidden interval and the domain
     \node[left, font=\bfseries] at (-0.5, #1+0.3) {#2};
 }
 
+\iffalse
+
 \resizebox{\columnwidth}{!}{%
 \begin{tikzpicture}[
     font=\small,
@@ -259,7 +322,115 @@ Depending on the relative position between the forbidden interval and the domain
 
 % ==========================================
 % Case 1: D_w giao bên phải vùng cấm (eq:forbid_1)
-\drawBase{5}{Case 1}
+\drawBase{7.5}{Case 1}
+\draw[domain_invalid] (3.5, 7.8) -- (\fMax, 7.8);
+\draw[domain_valid] (\fMax, 7.8) -- (8.5, 7.8);
+\node[domain_bound, red, label=above:{$D_{w,1}$}] at (3.5, 7.8) {};
+\node[red] at (4.75, 7.8) {$\dots$};
+\node[domain_bound, red, label=above:{$R-1$}] at (6.0, 7.8) {};
+\node[domain_bound, green!60!black, label=above:{$R$}] at (7.0, 7.8) {};
+\node[green!60!black] at (7.75, 7.8) {$\dots$};
+\node[domain_bound, green!60!black, label=above:{$D_{w,|D_w|}$}] at (8.5, 7.8) {};
+% Đưa công thức xuống dưới trục tọa độ
+\node[font=\bfseries, text=blue] at (4.5, 6.7) {$\Rightarrow b_{v,j} \rightarrow g_{w,R}$};
+
+% ==========================================
+% Case 2: D_w giao bên trái vùng cấm (eq:forbid_2)
+\drawBase{5}{Case 2}
+\draw[domain_valid] (0.5, 5.3) -- (\fMin, 5.3);
+\draw[domain_invalid] (\fMin, 5.3) -- (5.5, 5.3);
+\node[domain_bound, green!60!black, label=above:{$D_{w,1}$}] at (0.5, 5.3) {};
+\node[green!60!black] at (1.25, 5.3) {$\dots$};
+\node[domain_bound, green!60!black, label=above:{$L$}] at (2.0, 5.3) {};
+\node[domain_bound, red, label=above:{$L+1$}] at (3.0, 5.3) {};
+\node[red] at (4.25, 5.3) {$\dots$};
+\node[domain_bound, red, label=above:{$D_{w,|D_w|}$}] at (5.5, 5.3) {};
+% Đưa công thức xuống dưới trục tọa độ
+\node[font=\bfseries, text=blue] at (4.5, 4.2) {$\Rightarrow b_{v,j} \rightarrow \neg g_{w,L+1}$};
+
+% ==========================================
+% Case 3: D_w trùm qua cả 2 bên vùng cấm (eq:forbid_3)
+\drawBase{2.5}{Case 3}
+\draw[domain_valid] (0.5, 2.8) -- (\fMin, 2.8);
+\draw[domain_invalid] (\fMin, 2.8) -- (\fMax, 2.8);
+\draw[domain_valid] (\fMax, 2.8) -- (8.5, 2.8);
+\node[domain_bound, green!60!black, label=above:{$D_{w,1}$}] at (0.5, 2.8) {};
+\node[green!60!black] at (1.25, 2.8) {$\dots$};
+\node[domain_bound, green!60!black, label=above:{$L$}] at (2.0, 2.8) {};
+\node[domain_bound, red, label=above:{$L+1$}] at (3.0, 2.8) {};
+\node[red] at (4.5, 2.8) {$\dots$};
+\node[domain_bound, red, label=above:{$R-1$}] at (6.0, 2.8) {};
+\node[domain_bound, green!60!black, label=above:{$R$}] at (7.0, 2.8) {};
+\node[green!60!black] at (7.75, 2.8) {$\dots$};
+\node[domain_bound, green!60!black, label=above:{$D_{w,|D_w|}$}] at (8.5, 2.8) {};
+% Đưa công thức xuống dưới trục tọa độ
+\node[font=\bfseries, text=blue] at (4.5, 1.7) {$\Rightarrow b_{v,j} \rightarrow (\neg g_{w,L+1} \lor g_{w,R})$};
+
+% ==========================================
+% Case 4: no safe frequency remains; eliminated by preprocessing
+\drawBase{0}{Case 4}
+\draw[domain_invalid] (3.0, 0.3) -- (6.0, 0.3);
+\node[domain_bound, red, label=above:{$D_{w,1}$}] at (3.0, 0.3) {};
+\node[red] at (4.5, 0.3) {$\dots$};
+\node[domain_bound, red, label=above:{$D_{w,|D_w|}$}] at (6.0, 0.3) {};
+\node[font=\bfseries, text=blue] at (4.5, -0.8) {$\Rightarrow D_{v,j}\ \text{removed from }D_v\text{ by preprocessing}$};
+
+\end{tikzpicture}%
+}
+\caption{Visualization of the four relative positions between the forbidden interval $[D_{v,j}-d_{vw},D_{v,j}+d_{vw}]$ and the domain $D_w$. Red segments denote forbidden frequencies of $w$, whereas green segments denote admissible frequencies. Cases 1--3 are encoded by the boundary implications in~\eqref{eq:forbid_1}--\eqref{eq:forbid_3}. In Case 4, all frequencies in $D_w$ are forbidden, so $D_{v,j}$ is removed from $D_v$ by preprocessing.}
+\fi
+\resizebox{\columnwidth}{!}{%
+\begin{tikzpicture}[
+    font=\small,
+    axis/.style={-Latex, thick},
+    forbidden/.style={fill=red!8},
+    domain_invalid/.style={line width=1.2pt, red},
+    domain_valid/.style={line width=1.2pt, green!60!black},
+    domain_bound/.style={circle, fill, inner sep=1.5pt}
+]
+
+% ==========================================
+% Case 1: D_w lies entirely to the left of the forbidden interval
+\drawBase{12.5}{Case 1}
+\draw[domain_valid] (0.5, 12.8) -- (2.0, 12.8);
+\node[domain_bound, green!60!black, label=above:{$D_{w,1}$}] at (0.5, 12.8) {};
+\node[green!60!black] at (1.25, 12.8) {$\dots$};
+\node[domain_bound, green!60!black, label=above:{$D_{w,|D_w|}$}] at (2.0, 12.8) {};
+\node[font=\bfseries, text=blue] at (4.5, 11.7) {$\Rightarrow \text{No POSE implication}$};
+
+% ==========================================
+% Case 2: D_w overlaps the forbidden interval on the left
+\drawBase{10}{Case 2}
+\draw[domain_valid] (0.5, 10.3) -- (\fMin, 10.3);
+\draw[domain_invalid] (\fMin, 10.3) -- (5.5, 10.3);
+\node[domain_bound, green!60!black, label=above:{$D_{w,1}$}] at (0.5, 10.3) {};
+\node[green!60!black] at (1.25, 10.3) {$\dots$};
+\node[domain_bound, green!60!black, label=above:{$L$}] at (2.0, 10.3) {};
+\node[domain_bound, red, label=above:{$L+1$}] at (3.0, 10.3) {};
+\node[red] at (4.25, 10.3) {$\dots$};
+\node[domain_bound, red, label=above:{$D_{w,|D_w|}$}] at (5.5, 10.3) {};
+\node[font=\bfseries, text=blue] at (4.5, 9.2) {$\Rightarrow b_{v,j} \rightarrow \neg g_{w,L+1}$};
+
+% ==========================================
+% Case 3: D_w extends on both sides of the forbidden interval
+\drawBase{7.5}{Case 3}
+\draw[domain_valid] (0.5, 7.8) -- (\fMin, 7.8);
+\draw[domain_invalid] (\fMin, 7.8) -- (\fMax, 7.8);
+\draw[domain_valid] (\fMax, 7.8) -- (8.5, 7.8);
+\node[domain_bound, green!60!black, label=above:{$D_{w,1}$}] at (0.5, 7.8) {};
+\node[green!60!black] at (1.25, 7.8) {$\dots$};
+\node[domain_bound, green!60!black, label=above:{$L$}] at (2.0, 7.8) {};
+\node[domain_bound, red, label=above:{$L+1$}] at (3.0, 7.8) {};
+\node[red] at (4.5, 7.8) {$\dots$};
+\node[domain_bound, red, label=above:{$R-1$}] at (6.0, 7.8) {};
+\node[domain_bound, green!60!black, label=above:{$R$}] at (7.0, 7.8) {};
+\node[green!60!black] at (7.75, 7.8) {$\dots$};
+\node[domain_bound, green!60!black, label=above:{$D_{w,|D_w|}$}] at (8.5, 7.8) {};
+\node[font=\bfseries, text=blue] at (4.5, 6.7) {$\Rightarrow b_{v,j} \rightarrow (\neg g_{w,L+1} \lor g_{w,R})$};
+
+% ==========================================
+% Case 4: D_w overlaps the forbidden interval on the right
+\drawBase{5}{Case 4}
 \draw[domain_invalid] (3.5, 5.3) -- (\fMax, 5.3);
 \draw[domain_valid] (\fMax, 5.3) -- (8.5, 5.3);
 \node[domain_bound, red, label=above:{$D_{w,1}$}] at (3.5, 5.3) {};
@@ -268,139 +439,55 @@ Depending on the relative position between the forbidden interval and the domain
 \node[domain_bound, green!60!black, label=above:{$R$}] at (7.0, 5.3) {};
 \node[green!60!black] at (7.75, 5.3) {$\dots$};
 \node[domain_bound, green!60!black, label=above:{$D_{w,|D_w|}$}] at (8.5, 5.3) {};
-% Đưa công thức xuống dưới trục tọa độ
 \node[font=\bfseries, text=blue] at (4.5, 4.2) {$\Rightarrow b_{v,j} \rightarrow g_{w,R}$};
 
 % ==========================================
-% Case 2: D_w giao bên trái vùng cấm (eq:forbid_2)
-\drawBase{2.5}{Case 2}
-\draw[domain_valid] (0.5, 2.8) -- (\fMin, 2.8);
-\draw[domain_invalid] (\fMin, 2.8) -- (5.5, 2.8);
-\node[domain_bound, green!60!black, label=above:{$D_{w,1}$}] at (0.5, 2.8) {};
-\node[green!60!black] at (1.25, 2.8) {$\dots$};
-\node[domain_bound, green!60!black, label=above:{$L$}] at (2.0, 2.8) {};
-\node[domain_bound, red, label=above:{$L+1$}] at (3.0, 2.8) {};
-\node[red] at (4.25, 2.8) {$\dots$};
-\node[domain_bound, red, label=above:{$D_{w,|D_w|}$}] at (5.5, 2.8) {};
-% Đưa công thức xuống dưới trục tọa độ
-\node[font=\bfseries, text=blue] at (4.5, 1.7) {$\Rightarrow b_{v,j} \rightarrow \neg g_{w,L+1}$};
+% Case 5: D_w lies entirely to the right of the forbidden interval
+\drawBase{2.5}{Case 5}
+\draw[domain_valid] (7.0, 2.8) -- (8.5, 2.8);
+\node[domain_bound, green!60!black, label=above:{$D_{w,1}$}] at (7.0, 2.8) {};
+\node[green!60!black] at (7.75, 2.8) {$\dots$};
+\node[domain_bound, green!60!black, label=above:{$D_{w,|D_w|}$}] at (8.5, 2.8) {};
+\node[font=\bfseries, text=blue] at (4.5, 1.7) {$\Rightarrow \text{No POSE implication}$};
 
 % ==========================================
-% Case 3: D_w trùm qua cả 2 bên vùng cấm (eq:forbid_3)
-\drawBase{0}{Case 3}
-\draw[domain_valid] (0.5, 0.3) -- (\fMin, 0.3);
-\draw[domain_invalid] (\fMin, 0.3) -- (\fMax, 0.3);
-\draw[domain_valid] (\fMax, 0.3) -- (8.5, 0.3);
-\node[domain_bound, green!60!black, label=above:{$D_{w,1}$}] at (0.5, 0.3) {};
-\node[green!60!black] at (1.25, 0.3) {$\dots$};
-\node[domain_bound, green!60!black, label=above:{$L$}] at (2.0, 0.3) {};
-\node[domain_bound, red, label=above:{$L+1$}] at (3.0, 0.3) {};
+% Case 6: no safe frequency remains; eliminated by preprocessing
+\drawBase{0}{Case 6}
+\draw[domain_invalid] (3.0, 0.3) -- (6.0, 0.3);
+\node[domain_bound, red, label=above:{$D_{w,1}$}] at (3.0, 0.3) {};
 \node[red] at (4.5, 0.3) {$\dots$};
-\node[domain_bound, red, label=above:{$R-1$}] at (6.0, 0.3) {};
-\node[domain_bound, green!60!black, label=above:{$R$}] at (7.0, 0.3) {};
-\node[green!60!black] at (7.75, 0.3) {$\dots$};
-\node[domain_bound, green!60!black, label=above:{$D_{w,|D_w|}$}] at (8.5, 0.3) {};
-% Đưa công thức xuống dưới trục tọa độ
-\node[font=\bfseries, text=blue] at (4.5, -0.8) {$\Rightarrow b_{v,j} \rightarrow (\neg g_{w,L+1} \lor g_{w,R})$};
+\node[domain_bound, red, label=above:{$D_{w,|D_w|}$}] at (6.0, 0.3) {};
+\node[font=\bfseries, text=blue] at (4.5, -0.8) {$\Rightarrow D_{v,j}\ \text{removed from }D_v\text{ by preprocessing}$};
 
 \end{tikzpicture}%
 }
-\caption{Visualization of the three interference constraint scenarios based on Order Encoding. The forbidden frequency interval $[D_{v,j} - d_{vw}, D_{v,j} + d_{vw}]$ caused by assigning $b_{v,j} = \text{True}$ is highlighted in red. The discrete valid frequencies for adjacent vertex $w$ are represented by green points and enforced by boundary variables $g_{w,R}$ and $\neg g_{w,L+1}$.}
+\caption{Visualization of the six relative positions between the forbidden interval $[D_{v,j}-d_{vw},D_{v,j}+d_{vw}]$ and the domain $D_w$. Red segments denote forbidden frequencies of $w$, whereas green segments denote admissible frequencies. Cases 1 and 5 require no additional POSE implication because every value in $D_w$ already satisfies the interference constraint. Cases 2--4 are encoded by the boundary implications in~\eqref{eq:forbid_2},~\eqref{eq:forbid_3}, and~\eqref{eq:forbid_1}, respectively. In Case 6, all frequencies in $D_w$ are forbidden, so $D_{v,j}$ is removed from $D_v$ by preprocessing.}
 \label{fig:domain_pruning_cases}
 \end{figure}
 
+% TODO-POSE-rewrite-outline:
+% 1) Case explanation paragraph:
+%    - Use Fig.~\ref{fig:domain_pruning_cases} to explain where the safe regions of D_w lie relative to the forbidden interval induced by D_{v,j}.
+%    - Case 1: only the right safe region remains; g_{w,R} forces w to choose an index at least R.
+%    - Case 2: only the left safe region remains; \neg g_{w,L+1} forces w to choose an index at most L.
+%    - Case 3: the forbidden interval lies inside the range of D_w, so safe regions exist on both sides; \neg g_{w,L+1} \lor g_{w,R} allows either the left or the right side.
+%    - Add Case 4 to the figure: all candidate frequencies in D_w lie inside the forbidden interval. Label it as "eliminated by preprocessing"; it has no POSE clause because D_{v,j} would have been removed from D_v by \eqref{eq:pre_ineq}.
+%    - Avoid informal/overclaiming words such as jumping, retreating, drastically, seamlessly, and cumbersome.
+%
+% 2) Correctness transition paragraph:
+%    - State that DSE explicitly forbids each pair with |D_{v,j}-D_{w,j'}| <= d_{vw}.
+%    - State that POSE encodes the same admissible choices for w using the boundary indices L and R instead of enumerating all forbidden pairs.
+%    - Explicitly handle Case 4 in the proof: if the whole D_w is forbidden for D_{v,j}, then D_{v,j} has no compatible value in D_w and preprocessing removes it by \eqref{eq:pre_ineq}.
+%    - Lead into Proposition~\ref{prop:pose_correctness}, which should prove equivalence between POSE boundary implications and DSE interference clauses.
+%
+% 3) Complexity paragraph, preferably after Proposition~\ref{prop:pose_correctness}:
+%    - DSE may generate O(|D_v||D_w|) conflict clauses for an interference edge vw.
+%    - POSE generates O(1) boundary clauses per candidate assignment b_{v,j}, not O(1) per edge.
+%    - Therefore directed constraints from v to w require O(|D_v|) boundary clauses.
+%    - If both directions are generated, an undirected edge vw requires O(|D_v|+|D_w|) boundary clauses.
+%    - Order variables and consistency constraints are linear in the total domain size.
 As illustrated in Fig.~\ref{fig:domain_pruning_cases}, the DSE model inherently suffers from a combinatorial explosion by generating $\mathcal{O}(|D_v| \times |D_w|)$ conflict clauses for every adjacent pair $vw$ to prohibit invalid frequency combinations. POSE bypasses this bottleneck by establishing logical boundary points $L$ and $R$. Specifically, Case 1~\eqref{eq:forbid_1} and Case 2~\eqref{eq:forbid_2} force the adjacent vertex $w$ to entirely bypass the forbidden zone (either jumping over via $g_{w,R}$ or retreating via $\neg g_{w,L+1}$). When the domain spans both sides, Case 3~\eqref{eq:forbid_3} introduces a logical branching $(\neg g_{w,L+1} \lor g_{w,R})$, compelling $w$ to select a safe frequency on either side. By replacing the $\mathcal{O}(|D_v| \times |D_w|)$ pairwise conflicts with merely $\mathcal{O}(1)$ boundary implications per edge (atop a linear $\mathcal{O}(|D_v|)$ variable initialization), the proposed encoding drastically reduces the spatial complexity of the interference constraints. Consequently,~\eqref{eq:forbid_1}--\eqref{eq:forbid_3} inherently guarantee interference prevention, seamlessly replacing the cumbersome interference constraints~\eqref{eq:sat_ineq} of DSE.
 
-
-
-% \subsection{Objective Function Optimization via Incremental SAT}
-% \label{subsec:incremental_sat}
-% \begin{figure}[!htbp]
-% \centering
-% \resizebox{\columnwidth}{!}{%
-% \begin{tikzpicture}[
-%     node distance = 1.5cm and 1cm,
-%     var_box/.style = {draw, rectangle, minimum width=1.2cm, minimum height=0.8cm, align=center, font=\small},
-%     active_u/.style = {var_box, draw=blue, fill=blue!15, font=\small\bfseries},
-%     inactive_u/.style = {var_box, draw=blue!50, fill=blue!5, text=gray},
-%     arrow_u/.style = {-Latex, thick, blue},
-%     active_v/.style = {var_box, draw=red, fill=red!15, font=\small\bfseries},
-%     inactive_v/.style = {var_box, draw=red!50, fill=red!5, text=gray},
-%     arrow_v/.style = {-Latex, thick, red},
-%     active_A/.style = {var_box, draw=green!60!black, fill=green!15, font=\small\bfseries},
-%     inactive_A/.style = {var_box, draw=gray, fill=gray!10, text=gray},
-%     arrow_A/.style = {-Latex, thick, green!60!black}
-% ]
-
-% % --- Local Domains ---
-% \node[text=blue] (u_label) at (-1.5, 2.2) {\textbf{Transmitter $u$}};
-% \node[inactive_u] (xu1) at (-3, 1) {$b_{u,1}$\\($f=10$)};
-% \node[active_u] (xu2) at (-1.5, 1) {$b_{u,2}$\\($f=20$)}; 
-% \node[inactive_u] (xu3) at (0, 1) {$b_{u,3}$\\($f=30$)};
-
-% \node[text=red] (v_label) at (4, 2.2) {\textbf{Transmitter $v$}};
-% \node[inactive_v] (xv1) at (2.5, 1) {$b_{v,1}$\\($f=20$)};
-% \node[inactive_v] (xv2) at (4, 1) {$b_{v,2}$\\($f=30$)};
-% \node[active_v] (xv3) at (5.5, 1) {$b_{v,3}$\\($f=40$)}; 
-
-% % --- Global Frequency Pool ---
-% \node (global_label) at (-4, -1) {\textbf{Global Domain ($D$)}};
-% \node[inactive_A] (A1) at (-1, -1.8) {$A_1$\\($f=10$)};
-% \node[active_A] (A2) at (0.5, -1.8) {$A_2$\\($f=20$)};
-% \node[inactive_A] (A3) at (2, -1.8) {$A_3$\\($f=30$)};
-% \node[active_A] (A4) at (3.5, -1.8) {$A_4$\\($f=40$)};
-
-% % --- Implications ---
-% \draw[-Latex, draw=blue!30] (xu1.south) -- (A1.north);
-% \draw[arrow_u] (xu2.south) -- node[left, pos=0.5, font=\footnotesize, fill=white, inner sep=1pt] {$b_{u,2} \rightarrow A_2$} (A2.north);
-% \draw[-Latex, draw=blue!30] (xu3.south) -- (A3.north);
-
-% \draw[-Latex, draw=red!30] (xv1.south) -- (A2.north);
-% \draw[-Latex, draw=red!30] (xv2.south) -- (A3.north);
-% \draw[arrow_v] (xv3.south) -- node[right, pos=0.4, font=\footnotesize, fill=white, inner sep=1pt] {$b_{v,3} \rightarrow A_4$} (A4.north);
-
-% % --- Sequential Counter ---
-% \node[draw=green!60!black, rectangle, minimum width=6cm, minimum height=1cm, fill=green!5, font=\bfseries] (counter) at (1.25, -4) {\textbf{Minimum Order} \small (Minimizing $\sum A_{m}$)};
-
-% % Arrows to Counter
-% \draw[-Latex, draw=gray!50] (A1.south) -- (A1.south |- counter.north);
-% \draw[arrow_A] (A2.south) -- (A2.south |- counter.north);
-% \draw[-Latex, draw=gray!50] (A3.south) -- (A3.south |- counter.north);
-% \draw[arrow_A] (A4.south) -- (A4.south |- counter.north);
-
-% \end{tikzpicture}%
-% }
-% \caption{Mapping from local assignment variables ($b_{i,j}$) to global frequency usage variables ($A_m$), which are subsequently passed into the Sequential Counter to optimize the objective function.}
-% \label{fig:b_to_A_implication}
-% \end{figure}
-% Once the baseline search space is established, the objective of the MO-FAP is to minimize the total number of distinct frequencies utilized. To track the network's overall state, let $D = \bigcup_{i \in V} D_i$ be the global set of all available frequencies in the system, sorted in ascending order with a total size of $N = |D|$. Let $D_{m}$ denote the frequency value at the $m$-th position within this set ($1 \le m \le N$). We initialize a set of Boolean state variables $A_{m} \in \{\text{True}, \text{False}\}$, where $A_{m} = \text{True}$ if and only if the frequency $D_{m}$ is actively utilized by at least one transmitter. The logical dependency between the local vertex assignments (variables $b_{i,j}$) and the global frequency states is defined through the implication clauses in~\eqref{eq:active_link}. Fig.~\ref{fig:b_to_A_implication} illustrates an example of this linkage mechanism.
-% \begin{align}
-%     b_{i,j} \rightarrow A_{m}, \quad \forall i \in V, \forall j, m : D_{i,j} = D_{m} \label{eq:active_link}
-% \end{align}
-% The optimization of the objective function is executed via a linear search strategy. The algorithm begins by solving the baseline model to find an initial feasible solution, thereby establishing the initial Upper Bound ($UB$) for the number of utilized frequencies. In each subsequent iteration, the system is constrained to find a configuration using at most $k = UB - 1$ frequencies (an At-Most-$k$ constraint). If a valid configuration is found, the $UB$ is updated with the new value, and the loop continues until the solver returns \texttt{UNSAT}, which rigorously proves that the current $UB$ is the absolute global optimum.
-
-% Theoretically, these search iterations could be executed as independent solver calls. That is, for each new limit $k$, a fresh solver instance is initialized, the entire clause set is rebuilt from scratch, and the solving process restarts. However, this approach is highly inefficient because it forces the solver to restart, wiping out the entire search space state and the invaluable learned clauses accumulated during previous iterations. To optimize this process, we adopt the Incremental SAT technique \cite{Martins2014Incremental}, which allows the continuous reuse of the running solver across multiple iterations. 
-% % Within the Incremental SAT framework, there are two approaches to enforcing the active frequency limit.
-
-% To represent the objective function incrementally, modern SAT toolkits such as PySAT \cite{imms-sat18, itk-sat24} provide the (\texttt{ITotalizer}) encoding. 
-% In this method, the At-Most-$k$ clause set is constructed only once for the initial upper bound ($UB$). For subsequent iterations with smaller bounds ($k < UB$), the encoding utilizes a set of exposed control variables (assumptions) to restrict the number of active frequencies. 
-% However, the underlying binary tree structure of the Totalizer introduces a substantial number of auxiliary variables, and complex clause relationships. This topological complexity significantly increases the solving time.
-
-% Building upon the aforementioned paradigm of utilizing incremental control variables, we propose an optimized strategy that replaces the tree-based Totalizer with a Sequential Counter encoding \cite{Sinz2005}. The breakthrough of this method is that it perfectly inherits the $O(1)$ assumption-passing mechanism but drastically streamlines the logical topology. To thoroughly eliminate the structural overhead, the entire logical structure of the counter is generated and loaded into the solver only once with the initial maximum upper bound $K = UB - 1$. Formally, a set of auxiliary variables $S_{i,c}$ ($1 \le i \le N, 1 \le c \le K$) is initialized, signifying that among the first $i$ frequencies, at least $c$ frequencies are in an active state. The logical clause block of the counter is rigidly established by Equations~\eqref{eq:nsc_1}--\eqref{eq:nsc_7}.
-
-% Instead of adding new clauses to restrict the number of frequencies to $k < K$, we simply invoke the solver by passing a single \textit{Assumption} variable: $\neg S_{N, k+1}$ (assuming that it is impossible to have $\ge k+1$ active frequencies, which strictly enforces $\le k$). If the solver returns \texttt{SAT}, a new limit $UB' \le k$ is recorded. The system immediately retracts the old assumption in $O(1)$ time and invokes the next iteration with a tighter assumption, $\neg S_{N, UB'}$. 
-
-% This loop proceeds continuously until the SAT solver returns \texttt{UNSAT} or reaches the execution time limit (timeout). This \textit{Assumptions} passing strategy prevents the formula from expanding across iterations while allowing the solver to maintain the search tree intact and exploit 100\% of the knowledge from the learned clauses. Consequently, the proposed method completely eradicates the overhead of formula restructuring, drastically accelerating the convergence speed compared to the traditional restart approach.
-
-% \begin{align}
-%     & \bigwedge_{i=1}^{N} \left( A_i \rightarrow S_{i,1} \right) \label{eq:nsc_1} \\
-%     & \bigwedge_{i=2}^{N} \;\bigwedge_{c=1}^{\min(i-1,k)} \left( S_{i-1,c} \rightarrow S_{i,c} \right) \label{eq:nsc_2} \\
-%     & \bigwedge_{i=2}^{N} \;\bigwedge_{c=2}^{\min(i,k)} \left( A_i \land S_{i-1,c-1} \rightarrow S_{i,c} \right) \label{eq:nsc_3} \\
-%     & \bigwedge_{i=2}^{N} \;\bigwedge_{c=1}^{\min(i-1,k)} \left( \neg A_i \land \neg S_{i-1,c} \rightarrow \neg S_{i,c} \right) \label{eq:nsc_4} \\
-%     & \bigwedge_{i=1}^{k} \left( \neg A_i \rightarrow \neg S_{i,i} \right) \label{eq:nsc_5} \\
-%     & \bigwedge_{i=2}^{N} \;\bigwedge_{c=2}^{\min(i,k)} \left( \neg S_{i-1,c-1} \rightarrow \neg S_{i,c} \right) \label{eq:nsc_6} \\
-%     & \bigwedge_{i=k+1}^{N} \left( A_i \rightarrow \neg S_{i-1,k} \right) \label{eq:nsc_7}
-% \end{align}
 
 \subsection{Objective Function Optimization via Incremental SAT}
 \label{subsec:incremental_sat}
