@@ -183,13 +183,6 @@ Therefore, $f$ cannot be assigned to $v$ in any feasible solution. It is thus sa
 \label{subsec:sat_encoding}
 
 Unlike the ILP formulation, our SAT encoding relies on the positional order of the candidate frequencies. We define a Boolean variable $b_{v,j} = \text{True}$ if and only if transmitter $v$ is assigned the $j$-th frequency in its preprocessed domain $D_v$ (sorted in ascending order). Let $D_{v,j}$ denote the actual frequency value at index $j$. Based on this notation, the baseline feasibility constraints are encoded into three logical formulations, expressed in~\eqref{eq:sat_domain}--\eqref{eq:sat_ineq}.
-
-% Equation~\eqref{eq:sat_domain} represents the Exactly-One constraint. 
-% Although expressed in this numerical form for mathematical clarity, it can be seamlessly translated into standard Conjunctive Normal Form (CNF) clauses using well-established cardinality encoding schemes (e.g., pairwise AMO and ALO) readily supported by modern SAT libraries \cite{imms-sat18, itk-sat24}. 
-Equation~\eqref{eq:sat_domain} encodes the Exactly-One constraint. Although written in a numerical form for clarity, it can be translated into Conjunctive Normal Form (CNF) using standard cardinality encodings (e.g., At-Most-One and At-Least-One), which are readily supported by modern SAT libraries \cite{imms-sat18, itk-sat24}.
-Notably, no additional clauses are required to handle the pre-assignment constraint. Since the preprocessed domain of any pre-assigned transmitter naturally contains exactly one element ($|D_v| = 1$),~\eqref{eq:sat_domain} inherently reduces to $b_{v,1} = \text{True}$, natively satisfying the condition. 
-Bidirectional constraints are expressed in~\eqref{eq:sat_exact}: if transmitter $v$ is assigned the $j$-th frequency, the paired transmitter $w$ must be assigned a frequency index $j'$ such that the frequency separation between their actual values is exactly $d_{vw}$, and vice versa. 
-Finally, interference constraints (which correspond to the binary packing constraints in the ILP model) are handled in~\eqref{eq:sat_ineq} via conflict clauses: if transmitter $v$ selects the frequency index $j$, then the adjacent transmitter $w$ is strictly prohibited from adopting any frequency index $j'$ whose separation is less than or equal to the safety threshold $d_{vw}$.
  \begin{align}
     & \sum_{j=1}^{|D_v|} b_{v,j} = 1, \quad \forall v \in V \label{eq:sat_domain} \\
     & b_{v,j} \rightarrow \bigvee_{j'} b_{w,j'}, \notag \\
@@ -199,6 +192,12 @@ Finally, interference constraints (which correspond to the binary packing constr
     & \quad \forall vw \in E_{ineq}, \; \forall j \in \{1, \dots, |D_v|\}, \notag \\
     & \quad \forall j' \in \{1, \dots, |D_w|\} : |D_{v,j} - D_{w,j'}| \le d_{vw} \label{eq:sat_ineq}
 \end{align}
+% Equation~\eqref{eq:sat_domain} represents the Exactly-One constraint. 
+% Although expressed in this numerical form for mathematical clarity, it can be seamlessly translated into standard Conjunctive Normal Form (CNF) clauses using well-established cardinality encoding schemes (e.g., pairwise AMO and ALO) readily supported by modern SAT libraries \cite{imms-sat18, itk-sat24}. 
+Equation~\eqref{eq:sat_domain} encodes the Exactly-One constraint. Although written in a numerical form for clarity, it can be translated into Conjunctive Normal Form (CNF) using standard cardinality encodings (e.g., At-Most-One and At-Least-One), which are readily supported by modern SAT libraries \cite{imms-sat18, itk-sat24}.
+Notably, no additional clauses are required to handle the pre-assignment constraint. Since the preprocessed domain of any pre-assigned transmitter naturally contains exactly one element ($|D_v| = 1$),~\eqref{eq:sat_domain} inherently reduces to $b_{v,1} = \text{True}$, natively satisfying the condition. 
+Bidirectional constraints are expressed in~\eqref{eq:sat_exact}: if transmitter $v$ is assigned the $j$-th frequency, the paired transmitter $w$ must be assigned a frequency index $j'$ such that the frequency separation between their actual values is exactly $d_{vw}$, and vice versa. 
+Finally, interference constraints (which correspond to the binary packing constraints in the ILP model) are handled in~\eqref{eq:sat_ineq} via conflict clauses: if transmitter $v$ selects the frequency index $j$, then the adjacent transmitter $w$ is strictly prohibited from adopting any frequency index $j'$ whose separation is less than or equal to the safety threshold $d_{vw}$.
 
 Thus, the Boolean variables $b_{v,j}$ and constraints~\eqref{eq:sat_domain}--\eqref{eq:sat_ineq} ensure that every satisfying assignment of the DSE formula corresponds to a feasible frequency assignment satisfying constraints~\eqref{eq:ilp_domain},~\eqref{eq:ilp_exact}, and~\eqref{eq:ilp_ineq}. Conversely, any frequency assignment satisfying these constraints can be translated into a satisfying assignment of the DSE formula. This correctness property is formalized in Proposition~\ref{prop:dse_correctness}.
 
@@ -518,7 +517,8 @@ These search iterations could be executed as independent SAT calls, where each n
 & Set $UB\leftarrow$ the number of assigned frequencies in $\mathit{best}$. \\
 & \textbf{If} $UB=1$, \textbf{return} \texttt{OPT} with $\mathit{best}$ and $UB$. \\
 \midrule
-\textit{Step 4} & Set $K\leftarrow UB-1$ and build the selected objective encoding for the At-Most-$K$ constraint: \texttt{ITotalizer} for INC or Sequential Counter~\eqref{eq:nsc_1}--\eqref{eq:nsc_7} for INCSC. \\
+\textit{Step 4} & Set $K\leftarrow UB-1$ and build the selected objective encoding for the At-Most-$K$ constraint using \texttt{ITotalizer} for INC or Sequential Counter~\eqref{eq:nsc_1}--\eqref{eq:nsc_7} for INCSC.
+\\
 \midrule
 \textit{Step 5} & \textbf{While} $UB>1$ \textbf{do}: \\
 & \quad Set $k\leftarrow UB-1$ and solve $F$ with the corresponding assumption: the \texttt{ITotalizer} assumption $-\texttt{rhs}[k]$ enforcing At-Most-$k$ for INC, or $\neg S_{N,k+1}$ for INCSC. \\
@@ -588,12 +588,99 @@ This means that every feasible assignment uses at least $UB$ distinct frequencie
 % To standardize the presentation of the experimental results, we adopt a strict naming convention for the algorithmic configurations. The problem encoding models are denoted as \textbf{DSE} (Direct SAT Encoding) and \textbf{POSE} (Proposed Order-based SAT Encoding). These encodings are coupled with one of two incremental optimization strategies: \textbf{INC}, the baseline approach utilizing the \texttt{ITotalizer} abstraction from the \texttt{PySAT} library, or \textbf{INCSC}, our proposed approach utilizing the Sequential Counter. A complete SAT-based solving framework is explicitly defined by concatenating the encoding model with the optimization strategy. We systematically evaluate three specific SAT configurations: \textbf{POSE+INCSC} represents our ultimate proposed framework, whereas \textbf{POSE+INC} and \textbf{DSE+INCSC} serve as internal baselines for rigorous ablation analysis. Finally, the state-of-the-art commercial exact solvers are strictly referred to as \textbf{Gurobi}, \textbf{CPLEX-MIP}, and \textbf{CPLEX-CP}.
 All experiments were conducted on a workstation with an Intel Core i7-10850H processor and 16 GB RAM running Ubuntu 24.04.3 LTS. The SAT-based methods were implemented with CaDiCaL (v1.9.5) through \texttt{PySAT} \cite{imms-sat18,itk-sat24}. Each run was executed under \texttt{runlim} with a time limit of 600 seconds and a memory limit of 14,000 MB.
 
-The evaluation was performed on the standard CALMA and DUTtest benchmarks from the FAP web database \texttt{\url{https://fap.zib.de/}}. In addition to the native MO-FAP instances, we also reformulated CELAR and GRAPH instances into the MO-FAP objective in order to evaluate search-space pruning and infeasibility certification on more challenging cases. 
+The evaluation was performed on the standard CALMA and DUTtest benchmarks from the FAP web database \texttt{\url{https://fap.zib.de/}}. In addition to the native MO-FAP instances, we also reformulated CELAR and GRAPH instances into the MO-FAP objective. For these reformulated instances, the original constraints are kept unchanged, and only the objective is set to Minimum Order. Table~\ref{tab:benchmark_instances} summarizes the benchmark instances used in the experiments, where $|V|$ and $|E|$ denote the number of transmitters and distance constraints, respectively.
 % The implementation and benchmark data are publicly available at \texttt{\url{https://github.com/dev2points/Min-Order-Frequency-Assignment-Problem}}.
+\begin{table}[!htbp]
+\centering
+\caption{Benchmark instances used in the experiments}
+\label{tab:benchmark_instances}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.0}
+\begin{tabular}{@{}llp{0.29\columnwidth}rr@{}}
+\toprule
+\textbf{Instance} & \textbf{Original Name} & \textbf{Original Objective} & $|V|$ & $|E|$ \\
+\midrule
+C01 & CELAR 01 & Minimum Order & 916 & 5548 \\
+C02 & CELAR 02 & Minimum Order & 200 & 1235 \\
+C03 & CELAR 03 & Minimum Order & 400 & 2760 \\
+C04 & CELAR 04 & Minimum Order & 680 & 3967 \\
+C05 & CELAR 05 & Minimum Span & 400 & 2598 \\
+C06 & CELAR 06 & Minimum Interference & 200 & 1322 \\
+C07 & CELAR 07 & Minimum Interference & 400 & 2865 \\
+C08 & CELAR 08 & Minimum Interference & 916 & 5744 \\
+C09 & CELAR 09 & Minimum Interference & 680 & 4103 \\
+C10 & CELAR 10 & Minimum Interference & 680 & 4103 \\
+C11 & CELAR 11 & Minimum Order & 680 & 4103 \\
+G01 & GRAPH 01 & Minimum Order & 200 & 1134 \\
+G02 & GRAPH 02 & Minimum Order & 400 & 2245 \\
+G03 & GRAPH 03 & Minimum Span & 200 & 1134 \\
+G04 & GRAPH 04 & Minimum Span & 400 & 2244 \\
+G05 & GRAPH 05 & Minimum Interference & 200 & 1134 \\
+G06 & GRAPH 06 & Minimum Interference & 400 & 2170 \\
+G07 & GRAPH 07 & Minimum Interference & 400 & 2170 \\
+G08 & GRAPH 08 & Minimum Order & 680 & 3757 \\
+G09 & GRAPH 09 & Minimum Order & 916 & 5246 \\
+G10 & GRAPH 10 & Minimum Span & 680 & 3907 \\
+G11 & GRAPH 11 & Minimum Interference & 680 & 3757 \\
+G12 & GRAPH 12 & Minimum Interference & 680 & 4017 \\
+G13 & GRAPH 13 & Minimum Interference & 916 & 5273 \\
+G14 & GRAPH 14 & Minimum Order & 916 & 4638 \\
+T2.1 & TUD200.1 & Minimum Order & 200 & 1171 \\
+T2.2 & TUD200.2 & Minimum Order & 200 & 1143 \\
+T2.3 & TUD200.3 & Minimum Order & 200 & 1160 \\
+T2.4 & TUD200.4 & Minimum Order/Span & 200 & 1142 \\
+T2.5 & TUD200.5 & Minimum Interference & 200 & 1125 \\
+T9.1 & TUD916.1 & Minimum Order & 916 & 5177 \\
+T9.2 & TUD916.2 & Minimum Order & 916 & 5173 \\
+T9.3 & TUD916.3 & Minimum Order & 916 & 5262 \\
+T9.4 & TUD916.4 & Minimum Order/Span & 916 & 5183 \\
+T9.5 & TUD916.5 & Minimum Interference & 916 & 5213 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-For clarity, we denote the two SAT encodings as \textbf{DSE} (Direct SAT Encoding) and \textbf{POSE} (Proposed Order-based SAT Encoding). We also consider two incremental optimization strategies: \textbf{INC}, which employs \texttt{ITotalizer} for incremental cardinality constraints, and \textbf{INCSC}, which utilizes the Sequential Counter encoding described in Section~\ref{subsec:incremental_sat}. A complete solver configuration is named by combining one encoding and one optimization strategy; therefore, \textbf{POSE+INCSC} denotes the proposed method, while \textbf{POSE+INC} and \textbf{DSE+INCSC} are used as ablation baselines. 
+% For clarity, we denote the two SAT encodings as \textbf{DSE} (Direct SAT Encoding) and \textbf{POSE} (Proposed Order-based SAT Encoding). We also consider two incremental optimization strategies: \textbf{INC}, which employs \texttt{ITotalizer} for incremental cardinality constraints, and \textbf{INCSC}, which utilizes the Sequential Counter encoding described in Section~\ref{subsec:incremental_sat}. A complete solver configuration is named by combining one encoding and one optimization strategy; therefore, \textbf{POSE+INCSC} denotes the proposed method, while \textbf{POSE+INC} and \textbf{DSE+INCSC} are used as ablation baselines.
 % The proposed framework is further compared against Gurobi, CPLEX-CP, and CPLEX-MIP.
-The proposed framework is further compared against three commercial exact solvers: Gurobi (v12.0.3), CPLEX-CP, and CPLEX-MIP (IBM ILOG CPLEX Optimization Studio v12.1.1), where CPLEX-CP and CPLEX-MIP denote the constraint programming and mixed-integer programming modes of CPLEX, respectively.
+% The proposed framework is further compared against three commercial exact solvers: Gurobi (v12.0.3), CPLEX-CP, and CPLEX-MIP (IBM ILOG CPLEX Optimization Studio v12.1.1), where CPLEX-CP and CPLEX-MIP denote the constraint programming and mixed-integer programming modes of CPLEX, respectively.
+% The SAT-based methods differ in terms of how the feasibility constraints and the objective function are handled. For the feasibility constraints, DSE and POSE correspond to the encodings described in Sections~\ref{subsec:sat_encoding} and~\ref{subsec:order_encoding}, respectively. CARD keeps the same modeling target as DSE but replaces the SAT encodings of~\eqref{eq:sat_domain} and~\eqref{eq:sat_ineq}, which correspond to~\eqref{eq:ilp_domain} and~\eqref{eq:ilp_ineq}, by PySAT cardinality encodings. For the objective function, INC and INCSC correspond to the incremental SAT strategies described in Section~\ref{subsec:incremental_sat}. The proposed framework is further compared against Gurobi, CPLEX-CP, CPLEX-MIP, CP-SAT, and MaxSAT+POSE. Here, CPLEX-CP and CPLEX-MIP denote the constraint programming and mixed-integer programming models of CPLEX, respectively. Table~\ref{tab:method_notation} summarizes the method names used in the experimental results.
+The SAT-based methods differ in terms of how the feasibility constraints and the objective function are handled. For the feasibility constraints, DSE and POSE correspond to the encodings described in Sections~\ref{subsec:sat_encoding} and~\ref{subsec:order_encoding}, respectively, while CARD uses PySAT cardinality encodings for~\eqref{eq:sat_domain} and~\eqref{eq:sat_ineq}. For the objective function, INC and INCSC correspond to the incremental SAT strategies described in Section~\ref{subsec:incremental_sat}.
+The proposed framework is further compared against Gurobi, CPLEX-CP, CPLEX-MIP, CP-SAT, and MaxSAT+POSE. Table~\ref{tab:method_notation} summarizes the method names used in the experimental results.
+
+Each run is reported with one of three final statuses. \texttt{OPT} denotes that the solver certifies the minimum number of assigned frequencies, \texttt{INF} denotes that the instance is proven infeasible, and \texttt{TO} denotes that the run reaches the 600-second time limit without a certificate. When total solving time is computed, each \texttt{TO} run is counted as 600 seconds. Details on the benchmark data, experimental results, and source code are provided in the Data and Code Availability statement.
+
+\begin{table}[!htbp]
+\centering
+\caption{Methods compared in the experiments}
+\label{tab:method_notation}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}lp{0.72\columnwidth}@{}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{SAT encodings and objective strategies}} \\
+DSE & Direct SAT encoding with pairwise interference clauses. \\
+CARD & Cardinality-based SAT encoding for~\eqref{eq:sat_domain} and~\eqref{eq:sat_ineq} using PySAT Exactly-One and At-Most-One encodings. \\
+POSE & Proposed order-based SAT encoding. \\
+INC & Incremental SAT optimization using \texttt{ITotalizer}. \\
+INCSC & Incremental SAT optimization using Sequential Counter. \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{SAT configurations}} \\
+DSE+INCSC & DSE combined with INCSC. \\
+POSE+INC & POSE combined with INC. \\
+POSE+INCSC & POSE combined with INCSC. (Main proposed SAT configuration)\\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Baseline methods}} \\
+Gurobi & Gurobi MIP solver (v12.0.3). \\
+CPLEX-CP & CP model in CPLEX Optimization Studio (v12.1.1). \\
+CPLEX-MIP & MIP model in CPLEX Optimization Studio (v12.1.1). \\
+CP-SAT & CP-SAT solver in Google OR-Tools (v9.15.6755). \\
+MaxSAT+POSE & MaxSAT formulation with POSE constraints solved by RC2. \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 
 
@@ -607,8 +694,11 @@ The proposed framework is further compared against three commercial exact solver
 
 % Problem reduction through preprocessing is highly effective for reducing the size of the initial problem formulation. The empirical data, visually summarized in the scatter plot in Fig.~\ref{fig:preprocess_scatter}, reveals that preprocessing acts as a powerful catalyst for both the SAT-based models and commercial solvers. Specifically, for the proposed POSE+INCSC, pruning invalid frequency domains successfully accelerates the search process in 80.00\% of the overall instances (28 out of 35). Moreover, it effectively rescues CPLEX-MIP and CPLEX-CP from severe time limitations in 2 and 1 highly constrained instances, respectively. 
 % The most profound impact, however, is observed in the 13 inherently infeasible (\texttt{INF}) instances, where the preprocessing technique accelerates the execution time in 100\% of the cases for POSE+INCSC, DSE+INCSC, Gurobi, and CPLEX-MIP. Many instances in the standard benchmark datasets were originally designed for other objectives (e.g., MS-FAP or MI-FAP) and have thus been reformulated to evaluate the MO-FAP. Because these original instances were already strictly constrained for their initial targets, the margin for further minimizing the number of assigned frequencies is extremely narrow. Nevertheless, the core purpose of utilizing these modified instances is to rigorously test the exact solvers' capability in search space pruning and proving infeasibility (\texttt{UNSAT}). Powered by the domain preprocessing technique combined with the SAT's unit propagation mechanism, the proposed model demonstrates an outstanding ability to certify the \texttt{UNSAT} status almost instantaneously. As observed in Fig.~\ref{fig:preprocess_scatter}, the vast majority of data points gravitate toward the region below the $y=x$ boundary, representing a consistent performance gain across a wide range of problem complexities.
-Domain preprocessing substantially reduces the initial formulation. As shown in Fig.~\ref{fig:preprocess_scatter}, it speeds up POSE+INCSC on 28 of the 35 instances and also mitigates severe time degradation for CPLEX-MIP and CPLEX-CP on several hard cases. The effect is especially clear on the 13 infeasible (\texttt{INF}) instances, where preprocessing improves solving time in every case for POSE+INCSC, DSE+INCSC, Gurobi, and CPLEX-MIP. Many of these instances were reformulated from other FAP objectives, making them suitable for evaluating search-space pruning and infeasibility certification. 
-Most points in Fig.~\ref{fig:preprocess_scatter} lie below the $y=x$ line, indicating that preprocessing consistently reduces solving time across a broad range of instances, with the clearest gains observed on the infeasible (\texttt{INF}) cases.
+% Domain preprocessing substantially reduces the initial formulation. As shown in Fig.~\ref{fig:preprocess_scatter}, it speeds up POSE+INCSC on 28 of the 35 instances and also mitigates severe time degradation for CPLEX-MIP and CPLEX-CP on several hard cases. The effect is especially clear on the 13 infeasible (\texttt{INF}) instances, where preprocessing improves solving time in every case for POSE+INCSC, DSE+INCSC, Gurobi, and CPLEX-MIP. Many of these instances were reformulated from other FAP objectives, making them suitable for evaluating search-space pruning and infeasibility certification. 
+% Most points in Fig.~\ref{fig:preprocess_scatter} lie below the $y=x$ line, indicating that preprocessing consistently reduces solving time across a broad range of instances, with the clearest gains observed on the infeasible (\texttt{INF}) cases.
+
+This experiment evaluates the contribution of domain preprocessing to the solving process. As shown in Fig.~\ref{fig:preprocess_scatter}, POSE+INCSC is faster with preprocessing on 28 of the 35 instances. The effect is particularly visible on the 13 infeasible (\texttt{INF}) instances, where preprocessing reduces the time required to prove infeasibility for both POSE+INCSC and DSE+INCSC.
+The preprocessing step also affects the other exact solvers considered in this study. For CPLEX-MIP and CPLEX-CP, it avoids large slowdowns on several difficult instances. For Gurobi and CPLEX-MIP, it reduces the solving time on all infeasible instances. Overall, most points in Fig.~\ref{fig:preprocess_scatter} lie below the $y=x$ line, indicating that preprocessing is beneficial in this evaluation.
 
 \subsection{Evaluation of the Proposed Order-Based SAT Encoding}
 \begin{figure}[!htbp]
@@ -827,6 +917,7 @@ These results support the effectiveness of the proposed SAT-based architecture a
 Future work will extend the proposed framework to other FAP variants and real-world MO-FAP datasets. We also plan to investigate hybrid approaches that combine SAT-based exact solving with metaheuristic methods to improve scalability on large-scale communication networks.
 
 \section*{Data and Code Availability}
+\label{sec:data_code_availability}
 The source code and benchmark data used in this study are publicly available at: \url{https://github.com/dev2points/Min-Order-Frequency-Assignment-Problem}.
 
 % \balance
