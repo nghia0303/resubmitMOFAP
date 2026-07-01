@@ -1,4 +1,4 @@
-% \documentclass[lettersize,journal]{IEEEtran}
+﻿% \documentclass[lettersize,journal]{IEEEtran}
 
 \documentclass[letterpaper,journal]{IEEEtran}
 \usepackage{amsmath,amsfonts}
@@ -17,6 +17,7 @@
 \usepackage{cite}
 \usepackage{tikz}
 \usepackage{booktabs}
+\usepackage{multirow}
 \usepackage[hidelinks]{hyperref}
 % \usepackage{balance}
 \usetikzlibrary{positioning, arrows.meta, shapes.geometric, calc}
@@ -52,9 +53,17 @@
 \maketitle
 
 \begin{abstract}
-The Minimum Order Frequency Assignment Problem (MO-FAP) is a fundamental NP-hard problem in spectrum management, where the objective is to minimize the number of assigned frequencies while ensuring no interference between transmitters. Currently, metaheuristic methods cannot prove optimality, while commercial exact solvers (MIP/CP) often struggle on heavily constrained instances.
-In this paper, we propose an exact framework based on Boolean Satisfiability (SAT) for solving MO-FAP. The key idea is to exploit standard order variables to reformulate pairwise interference constraints as interval-boundary constraints in a proposed encoding called POSE, thereby reducing the number of explicit conflict clauses relative to a direct SAT encoding. In addition, we develop an incremental SAT solving strategy (INCSC) based on Sequential Counter encoding, where the clause construction is designed to support incremental solving and clause reuse across iterations without rebuilding the formula.
-Experiments on standard MO-FAP benchmark instances show that the proposed approach can certify optimality or infeasibility on all 35 tested instances within a 600-second time limit. On this benchmark set and under the reported settings, the proposed SAT-based framework consistently achieves lower cumulative runtime than the considered commercial solvers, particularly on highly constrained instances. These results indicate that the proposed approach is an effective exact framework for MO-FAP on the tested benchmark set.
+% The Minimum Order Frequency Assignment Problem (MO-FAP) is a fundamental NP-hard problem in spectrum management, where the objective is to minimize the number of assigned frequencies while ensuring no interference between transmitters. Currently, metaheuristic methods cannot prove optimality, while commercial exact solvers (MIP/CP) often struggle on heavily constrained instances.
+% In this paper, we propose an exact framework based on Boolean Satisfiability (SAT) for solving MO-FAP. The key idea is to exploit standard order variables to reformulate pairwise interference constraints as interval-boundary constraints in a proposed encoding called POSE, thereby reducing the number of explicit conflict clauses relative to a direct SAT encoding. In addition, we develop an incremental SAT solving strategy (INCSC) based on Sequential Counter encoding, where the clause construction is designed to support incremental solving and clause reuse across iterations without rebuilding the formula.
+% Experiments on standard MO-FAP benchmark instances show that the proposed approach can certify optimality or infeasibility on all 35 tested instances within a 600-second time limit. On this benchmark set and under the reported settings, the proposed SAT-based framework consistently achieves lower cumulative runtime than the considered commercial solvers, particularly on highly constrained instances. These results indicate that the proposed approach is an effective exact framework for MO-FAP on the tested benchmark set.
+The Minimum Order Frequency Assignment Problem (MO-FAP) is a fundamental NP-hard problem in spectrum management, where the objective is to minimize the number of assigned frequencies while satisfying interference constraints between transmitters.
+Current metaheuristic methods typically do not provide optimality certificates, while traditional exact methods can struggle on heavily constrained instances.
+This study proposes an exact framework based on Boolean Satisfiability (SAT) for solving MO-FAP.
+The key idea is to use standard order variables to reformulate pairwise interference constraints as interval-boundary constraints in a proposed encoding called POSE, thereby reducing the number of explicit conflict clauses relative to a direct SAT encoding.
+In addition, the framework includes an incremental SAT solving strategy (INCSC) based on Sequential Counter encoding, where the clause construction is designed to support incremental solving and clause reuse across iterations without rebuilding the formula.
+Experiments on 35 CALMA and DUTtest benchmark instances from the FAP database show that the proposed approach certifies optimality or infeasibility for every tested instance within a 600-second time limit.
+On the tested benchmark set, it certifies more instances than the considered exact baselines and reduces solving time on several instances where the baselines reach the time limit.
+These results show that the proposed SAT-based framework provides exact certification with competitive runtime on the tested MO-FAP benchmark instances.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -87,14 +96,14 @@ Representative methods include Tabu Search \cite{Dib2009,Alrajhi2016_Dynamic,Alr
 Recent metaheuristic methods, such as Extremal Optimization (EO) \cite{Gomez2023MO}, achieve high-quality solutions on standard benchmarks. However, their approximate nature prevents them from certifying global optimality. Moreover, many approaches (including EO) rely on iteration-based stopping criteria rather than runtime limits, which may bias evaluations and hinder fair comparisons of solver performance.
 
 To address these limitations, this paper proposes an exact approach based on Boolean Satisfiability (SAT) with three core contributions. 
-First, we develop the Proposed Order-based SAT Encoding (POSE) for interference constraints between two vertices. POSE uses standard order variables but introduces a problem-specific interval-boundary formulation that replaces many explicit pairwise conflict clauses of the direct SAT encoding.
+First, we develop the Proposed Order-based SAT Encoding (POSE) for the interference constraints. POSE uses standard order variables but introduces a problem-specific interval-boundary formulation that replaces many explicit pairwise conflict clauses of the direct SAT encoding.
 % Second, we propose an objective function representation technique for the MO-FAP utilizing sequential counter encoding \cite{Sinz2005}.
 % Specifically, this counter is integrated into an Incremental SAT-based optimization strategy, denoted as INCSC, to generate control variables that assist the SAT solver in rapidly pruning the search branches. 
 % Finally, the effectiveness and reliability of the proposed method are verified through comprehensive and consistent experiments on two standard benchmarks of MO-FAP, CALMA and DUTtest. 
 % The experimental results are directly compared with strong and commercial exact solvers such as Gurobi and CPLEX, thereby confirming the capability of the SAT model in finding and certifying global optimal solutions.
-Second, we introduce an objective function representation based on Sequential Counter encoding \cite{Sinz2005}, integrated into an incremental SAT optimization strategy (INCSC) to enable efficient branch pruning. Finally, we evaluate the proposed approach on two standard MO-FAP benchmarks, CALMA and DUTtest, and compare it against commercial exact solvers such as Gurobi and CPLEX, demonstrating its effectiveness in finding and certifying global optimal solutions on the tested instances.
+Second, we introduce an objective function representation based on Sequential Counter encoding \cite{Sinz2005}, integrated into an incremental SAT optimization strategy (INCSC) to support iterative tightening of the number of assigned frequencies. Finally, we evaluate the proposed approach on 35 CALMA and DUTtest benchmark instances and compare it against SAT-encoding variants and other exact baselines. The results show that the proposed framework certifies optimality or infeasibility on the tested instances within the reported time limit.
 
-The remainder of this paper is organized as follows. Section~\ref{sec:Problem_statement} formulates the MO-FAP and reviews related work. Section~\ref{sec:method} details the proposed SAT encoding method, including the search space optimization technique and the objective function representation. Section~\ref{sec:exp} analyzes the experimental results. Finally, Section~\ref{sec:conclusion} summarizes the contributions and outlines future research directions.
+The remainder of this paper is organized as follows. Section~\ref{sec:Problem_statement} formulates the MO-FAP and reviews related work. Section~\ref{sec:method} details the proposed SAT encoding method, including the use of order variables for interference constraints and the incremental objective optimization strategy. Section~\ref{sec:exp} analyzes the experimental results. Finally, Section~\ref{sec:conclusion} summarizes the contributions and outlines future research directions.
 
 \section{The MO-FAP and related work}
 \label{sec:Problem_statement}
@@ -104,10 +113,15 @@ Here, $D = \bigcup_{v \in V} D_v$ represents the global domain of all available 
 The set of edges $E$ represents the frequency interference constraints and is partitioned into two disjoint subsets: $E_{eq}$ (bidirectional constraints) and $E_{ineq}$ (interference constraints). 
 Let $d_{vw}$ denote the required frequency separation distance between two adjacent transmitters $v$ and $w$.
 % To provide a rigorous mathematical definition of the MO-FAP, we formulate it as an Integer Linear Programming (ILP) model \cite{Aardal2007}.
-To provide a rigorous mathematical definition of the MO-FAP, we present an Integer Linear Programming (ILP) formulation based on the standard MO-FAP modeling framework in the literature \cite{Aardal2007}.
-Let $x_{vf} \in \{0, 1\}$ be a binary decision variable that takes the value 1 if frequency $f \in D_v$ is assigned to transmitter $v$, and 0 otherwise. 
-Additionally, let $y_f \in \{0, 1\}$ be a variable that takes the value 1 if frequency $f \in D$ is utilized by at least one transmitter in the network. 
-The MO-FAP is explicitly formulated by the objective function~\eqref{eq:ilp_obj} and constraints~\eqref{eq:ilp_domain}--\eqref{eq:ilp_ybin}.
+To provide a rigorous mathematical definition of the MO-FAP, we present an Integer Linear Programming (ILP) formulation based on the standard MO-FAP modeling framework in the literature~\cite{Aardal2007}.
+The formulation follows the MO-FAP benchmark setting adopted by Gomez and Ayala~\cite{Gomez2023MO}, using benchmark instances from the FAP web database.
+
+% Let $x_{vf} \in \{0, 1\}$ indicate whether frequency $f \in D_v$ is assigned to transmitter $v$.
+% Let $y_f \in \{0, 1\}$ indicate whether frequency $f \in D$ is used by at least one transmitter.
+% The MO-FAP is formulated by the objective function~\eqref{eq:ilp_obj} and constraints~\eqref{eq:ilp_domain}--\eqref{eq:ilp_ybin}.
+Let $x_{vf} \in \{0, 1\}$ be a binary decision variable indicating whether frequency $f \in D_v$ is assigned to transmitter $v$.
+Similarly, let $y_f \in \{0, 1\}$ be a binary variable indicating whether frequency $f \in D$ is used by at least one transmitter.
+The MO-FAP is formulated by the objective function~\eqref{eq:ilp_obj} and constraints~\eqref{eq:ilp_domain}--\eqref{eq:ilp_ybin}.
 \begin{align} 
     & \text{Minimize} \quad \sum_{f \in D} y_f \label{eq:ilp_obj} \\
     & \text{Subject to} \notag \\
@@ -125,24 +139,24 @@ In this formulation, the objective function~\eqref{eq:ilp_obj} minimizes the tot
 Interference is modeled through aggregated packing constraints: for each pair $vw \in E_{eq}$ or $vw \in E_{ineq}$, constraints~\eqref{eq:ilp_exact} and~\eqref{eq:ilp_ineq} ensure that if $x_{vf} = 1$, then all conflicting assignments $x_{wh}$ (based on the required separation) are forbidden by forcing their sum to zero.
 \subsection{Related Work}
 % Research on the MO-FAP has attracted widespread attention over the past decades. The evolution of solution techniques for this NP-hard problem can be broadly classified into two main research streams: exact methods and approximation algorithms.
-The MO-FAP has been extensively studied over the past decades. Existing solution approaches can be broadly categorized into two main classes: exact methods and approximation algorithms.
+The MO-FAP and related frequency assignment variants have been studied over several decades. Existing solution approaches can be broadly categorized into two main classes: exact methods and approximation algorithms.
 
-The first category encompasses studies dedicated to formalizing mathematical models and developing exact solution methods. The pioneering work of Baybars \cite{Baybars1982} laid the earliest mathematical foundation by formulating the assignment of broadcasting frequencies as a 0-1 integer programming problem. Driven by this foundational conceptualization and the pursuit of global optimality, a diverse array of exact algorithms was actively explored in the following decades. These efforts include branch-and-cut techniques \cite{Aardal1996, Fischetti2000}, partial constraint satisfaction formulations related to FAP \cite{Koster1998}, enumerative algorithms \cite{Mannino2003}, and graph-theoretic approaches \cite{Kral2005}. A comprehensive synthesis of these milestones, which unified various FAP variants and established the core ILP models, was later provided in the classic survey by Aardal et al. \cite{Aardal2007}.
+The first category encompasses studies dedicated to formalizing mathematical models and developing exact solution methods. The pioneering work of Baybars \cite{Baybars1982} formulated the assignment of broadcasting frequencies as a 0-1 integer programming problem. Driven by this foundational conceptualization and the pursuit of global optimality, a diverse array of exact algorithms was actively explored in the following decades. These efforts include branch-and-cut techniques \cite{Aardal1996, Fischetti2000}, partial constraint satisfaction formulations related to FAP \cite{Koster1998}, enumerative algorithms \cite{Mannino2003}, and graph-theoretic approaches \cite{Kral2005}. A comprehensive synthesis of these milestones, which unified various FAP variants and established the core ILP models, was later provided in the classic survey by Aardal et al. \cite{Aardal2007}.
 % Subsequent efforts in this exact domain also introduced exponential-time dynamic programming \cite{Uyanik2014}. However, despite their rigorous mathematical ability to guarantee global optimal solutions, a shared bottleneck among all these exact solvers is their inherent exponential time complexity.
 % When dealing with the combinatorial explosion of large-scale telecommunication networks, traditional exact methods frequently suffer from computationally prohibitive run-times and memory exhaustion, making them practical only for small-to-medium instances \cite{Aardal2007,Mahmoudi2023}.
-Subsequent efforts in this exact domain, including Dynamic Programming approaches \cite{Uyanik2014}, remain fundamentally bottlenecked by the inherent combinatorial explosion of the problem.
-Consequently, the exponential growth in the search space causes severe memory exhaustion and scalability issues, restricting these exact methods to small-scale instances and causing even modern commercial solvers to struggle with heavily constrained interference graphs \cite{Aardal2007, Uyanik2014}.
+Subsequent exact approaches, including dynamic programming methods~\cite{Uyanik2014}, still face the combinatorial growth of the search space.
+As a result, these methods can become computationally demanding on large or heavily constrained instances~\cite{Aardal2007,Uyanik2014}.
 
-Faced with these severe scalability limitations, the research community heavily shifted its focus toward approximation algorithms.
+To address these computational challenges, many studies have considered approximation algorithms.
 % A notable milestone during this transition is the work of Dib et al. \cite{Dib2009}, wherein the authors conducted comprehensive empirical evaluations and cross-referenced their findings with previous milestones established on the FAP web repository.
 A notable milestone during this transition is the work of Dib et al. \cite{Dib2009}, who proposed a hybrid optimization method combining constraint propagation, nogood management, and Tabu Search for the frequency assignment problem.
 Following this, the field witnessed a proliferation of heuristic and metaheuristic methods to handle large-scale networks.
 This era was marked by extensive contributions from Alrajhi and colleagues, who consistently proposed algorithms based on Tabu Search hybridized with various neighborhood structures \cite{Alrajhi2016_Hybridized}, dynamic multiple neighborhood structures \cite{Alrajhi2023Neighborhood}, variations of Ant Colony Optimization (including DACO) \cite{Alrajhi2023AntMetaheuristic, Alrajhi2023DynamicACO}, and dynamic hyper-heuristics \cite{Alrajhi2023DynamicHyper}.
-Recently, Gomez and Ayala \cite{Gomez2023MO} successfully applied the Extremal Optimization (EO) algorithm to the MO-FAP variant, performing a comprehensive cross-comparison between Aardal's original models \cite{Aardal2007} and the empirical results of Alrajhi's group.
+Recently, Gomez and Ayala~\cite{Gomez2023MO} applied the Extremal Optimization (EO) algorithm to the MO-FAP variant and compared their results with the benchmark results summarized by Aardal et al.~\cite{Aardal2007} and empirical results reported by Alrajhi's group.
 
 % Overall, while the research community has built a rich algorithmic ecosystem for the MO-FAP, several critical gaps remain. First, a lack of standardization in evaluation environments particularly the reliance on maximum iterations rather than strict execution time limits as seen in \cite{Gomez2023MO} compromises the objective assessment of solver architectures. Second, and most importantly, while modern metaheuristics can rapidly reach theoretical lower bounds on large networks, their approximate nature inherently lacks the mathematical tools to certify global optimality. Conversely, traditional exact methods (ILP, CP, Graph Theory, DP) still struggle with scalability and memory exhaustion \cite{Aardal2007,Mahmoudi2023}. These limitations necessitate a fundamentally new encoding architecture such as the Order-based SAT approach proposed in this paper to successfully bridge the gap between strict global optimality certification and computational scalability.
-Overall, although a rich set of solution methods has been developed for the MO-FAP, several limitations remain. First, the lack of standardized evaluation protocols, particularly the use of iteration-based stopping criteria instead of runtime limits as in \cite{Gomez2023MO} hinders fair comparison between solvers. Second, while metaheuristics can quickly reach high-quality solutions on large instances, they cannot certify global optimality. In contrast, traditional exact methods (ILP, CP, DP) often suffer from scalability and memory limitations \cite{Aardal2007,Mahmoudi2023}.
-Recently, SAT-based approaches have emerged as a powerful paradigm for exact method in combinatorial problems \cite{fichte2023silent}, including various graph labeling problems \cite{glorian2019incremental, faber2024sat}, where they have demonstrated strong performance in both scalability and optimality certification. Motivated by these advances, this work proposes an order-based SAT encoding to bridge the gap between exact optimality guarantees and computational efficiency for the MO-FAP.
+Overall, although a rich set of solution methods has been developed for the MO-FAP, several limitations remain. First, different evaluation protocols, such as iteration-based stopping criteria used in~\cite{Gomez2023MO} instead of runtime limits, can make solver comparisons less direct. Second, while metaheuristics can quickly reach high-quality solutions on large instances, they cannot certify global optimality. In contrast, traditional exact methods (ILP, CP, DP) can become computationally demanding on difficult instances~\cite{Aardal2007,Mahmoudi2023}.
+Recently, SAT-based approaches have been used for exact solving in combinatorial problems~\cite{fichte2023silent}, including graph labeling problems~\cite{glorian2019incremental,faber2024sat}. These works show that SAT encodings can provide exact certification while benefiting from modern SAT solvers. Motivated by these advances, this work proposes a SAT-based exact framework for MO-FAP that combines standard order variables for the interference constraints with incremental optimization of the objective function.
 \section{Proposed Exact Approach}
 \label{sec:method}
 % This section details the proposed SAT-based methodology for solving the MO-FAP.
@@ -165,7 +179,6 @@ If this preprocessing step makes some domain $D_v$ empty, then no feasible assig
 
 For each edge $vw$, a candidate frequency $f \in D_v$ is retained only when there exists a frequency $h \in D_w$ that satisfies the corresponding edge constraint.
 For interference constraints and bidirectional constraints, the corresponding domain filtering rules are defined in~\eqref{eq:pre_ineq} and~\eqref{eq:pre_eq}, respectively.
-
 \begin{align}
     D_v &\leftarrow \{ f \in D_v \mid \exists h \in D_w : |f - h| > d_{vw} \},
     \notag \\
@@ -177,7 +190,8 @@ For interference constraints and bidirectional constraints, the corresponding do
  
 Removing a frequency by the preprocessing rules does not remove any feasible solution of the original problem. Consider a transmitter-frequency pair $(v,f)$ with $f \in D_v$. 
 If $f$ does not satisfy the retaining condition in either~\eqref{eq:pre_ineq} or~\eqref{eq:pre_eq} for an edge $vw$, then no frequency in $D_w$ can be assigned together with $f$ while satisfying the constraint on that edge. 
-Therefore, $f$ cannot be assigned to $v$ in any feasible solution. It is thus safe to remove $f$ from $D_v$ before constructing the optimization models.
+% Therefore, $f$ cannot be assigned to $v$ in any feasible solution. It is thus safe to remove $f$ from $D_v$ before constructing the optimization models.
+Therefore, $f$ cannot be assigned to $v$ in any feasible solution and can be safely removed from $D_v$ before model construction.
 
 \subsection{Direct SAT Encoding}
 \label{subsec:sat_encoding}
@@ -254,33 +268,134 @@ Subsequently, the order variables $g$ are used to reformulate the interference c
 In Cases~1 and~2, the domain $D_w$ lies entirely outside the forbidden interval. Therefore, every value in $D_w$ already satisfies the interference constraint, and no additional constraint is required. 
 % For the remaining cases, the corresponding clauses are constructed by~\eqref{eq:forbid_1}--\eqref{eq:forbid_3}. 
 For Cases~3--5, in which at least one value of $D_w$ lies in the forbidden interval, the corresponding clauses are constructed by~\eqref{eq:forbid_2},~\eqref{eq:forbid_1}, and~\eqref{eq:forbid_3}.
-In Case~3, the forbidden interval overlaps the right part of $D_w$, so the remaining values of $D_w$ lie entirely to the left of the forbidden interval, and the clause is given by~\eqref{eq:forbid_2}. In Case~4, the forbidden interval overlaps the left part of $D_w$, so the remaining values of $D_w$ lie entirely to the right of the forbidden interval, and the clause is given by~\eqref{eq:forbid_1}. In Case~5, the forbidden interval lies strictly inside $D_w$, so the remaining values of $D_w$ appear on both sides of the forbidden interval, and the clause is given by~\eqref{eq:forbid_3}. Notably, $L$ is used only in~\eqref{eq:forbid_2} and~\eqref{eq:forbid_3}, whereas $R$ is used only in~\eqref{eq:forbid_1} and~\eqref{eq:forbid_3}. Therefore, each boundary index is defined only in the cases where the corresponding side of $D_w$ exists.
-Case~6 occurs when every value in $D_w$ lies in the forbidden interval induced by $D_{v,j}$. In the current formulation, this case is eliminated by preprocessing, whereas without preprocessing it can be encoded directly by the unary clause $\neg b_{v,j}$. Proposition~\ref{prop:pose_correctness} shows that these boundary clauses are equivalent to the pairwise interference clauses of DSE.
-\begin{figure}[!t]
-\centering
+% \begin{align}
+%     b_{v,j} &\rightarrow \neg g_{w,L+1},
+%     \notag\\
+%     &\quad
+%     L=\operatorname{arg\,max}_{k}
+%     \{k\mid D_{w,k}<D_{v,j}-d_{vw}\}
+%     \label{eq:forbid_2}\\[2pt]
+%     b_{v,j} &\rightarrow g_{w,R},
+%     \notag\\
+%     &\quad
+%     R=\operatorname{arg\,min}_{k}
+%     \{k\mid D_{w,k}>D_{v,j}+d_{vw}\}
+%     \label{eq:forbid_1}\\[2pt]
+%     b_{v,j} &\rightarrow (\neg g_{w,L+1}\lor g_{w,R}),
+%     \notag\\
+%     &\quad
+%     L=\operatorname{arg\,max}_{k}
+%     \{k\mid D_{w,k}<D_{v,j}-d_{vw}\},
+%     \notag\\
+%     &\quad
+%     R=\operatorname{arg\,min}_{k}
+%     \{k\mid D_{w,k}>D_{v,j}+d_{vw}\}
+%     \label{eq:forbid_3}
+% \end{align}
+\begin{align}
+    b_{v,j} &\rightarrow \neg g_{w,L+1},
+    \notag\\
+    &\quad
+    {\scriptstyle
+    L=\operatorname{arg\,max}_{k}
+    \{k\mid D_{w,k}<D_{v,j}-d_{vw}\},}
+    \notag\\
+    &\quad
+    {\scriptstyle
+    \forall vw\in E_{ineq},\; j\in\{1,\ldots,|D_v|\},}
+    \notag\\
+    &\quad
+    {\scriptstyle
+    \{k\mid D_{w,k}<D_{v,j}-d_{vw}\}\neq\emptyset,}
+    \notag\\
+    &\quad
+    {\scriptstyle
+    \{k\mid D_{v,j}-d_{vw}\le D_{w,k}\le D_{v,j}+d_{vw}\}\neq\emptyset,}
+    \notag\\
+    &\quad
+    {\scriptstyle
+    \{k\mid D_{w,k}>D_{v,j}+d_{vw}\}=\emptyset}
+    \label{eq:forbid_2}\\[2pt]
+    b_{v,j} &\rightarrow g_{w,R},
+    \notag\\
+    &\quad
+    {\scriptstyle
+    R=\operatorname{arg\,min}_{k}
+    \{k\mid D_{w,k}>D_{v,j}+d_{vw}\},}
+    \notag\\
+    &\quad
+    {\scriptstyle
+    \forall vw\in E_{ineq},\; j\in\{1,\ldots,|D_v|\},}
+    \notag\\
+    &\quad
+    {\scriptstyle
+    \{k\mid D_{w,k}<D_{v,j}-d_{vw}\}=\emptyset,}
+    \notag\\
+    &\quad
+    {\scriptstyle
+    \{k\mid D_{v,j}-d_{vw}\le D_{w,k}\le D_{v,j}+d_{vw}\}\neq\emptyset,}
+    \notag\\
+    &\quad
+    {\scriptstyle
+    \{k\mid D_{w,k}>D_{v,j}+d_{vw}\}\neq\emptyset}
+    \label{eq:forbid_1}\\[2pt]
+    b_{v,j} &\rightarrow (\neg g_{w,L+1}\lor g_{w,R}),
+    \notag\\
+    &\quad
+    {\scriptstyle
+    L=\operatorname{arg\,max}_{k}
+    \{k\mid D_{w,k}<D_{v,j}-d_{vw}\},}
+    \notag\\
+    &\quad
+    {\scriptstyle
+    R=\operatorname{arg\,min}_{k}
+    \{k\mid D_{w,k}>D_{v,j}+d_{vw}\},}
+    \notag\\
+    &\quad
+    {\scriptstyle
+    \forall vw\in E_{ineq},\; j\in\{1,\ldots,|D_v|\},}
+    \notag\\
+    &\quad
+    {\scriptstyle
+    \{k\mid D_{w,k}<D_{v,j}-d_{vw}\}\neq\emptyset,}
+    \notag\\
+    &\quad
+    {\scriptstyle
+    \{k\mid D_{v,j}-d_{vw}\le D_{w,k}\le D_{v,j}+d_{vw}\}\neq\emptyset,}
+    \notag\\
+    &\quad
+    {\scriptstyle
+    \{k\mid D_{w,k}>D_{v,j}+d_{vw}\}\neq\emptyset}
+    \label{eq:forbid_3}
+\end{align}
+For each considered interference edge \(vw\) and assignment \(D_{v,j}\), the three set conditions specify whether \(D_w\) has values to the left of the forbidden interval, inside the forbidden interval, and to the right of the forbidden interval, respectively. These conditions ensure that the boundary indices \(L\) and \(R\) are introduced only when the corresponding side exists and that Cases~3--5 are actual overlap cases.
 
-% Đưa toàn bộ việc định nghĩa macro ra NGOÀI lệnh \resizebox
+In Case~3, the forbidden interval overlaps the right part of $D_w$, so the remaining values of $D_w$ lie entirely to the left of the forbidden interval, and the clause is given by~\eqref{eq:forbid_2}. In Case~4, the forbidden interval overlaps the left part of $D_w$, so the remaining values of $D_w$ lie entirely to the right of the forbidden interval, and the clause is given by~\eqref{eq:forbid_1}. In Case~5, the forbidden interval lies strictly inside $D_w$, so the remaining values of $D_w$ appear on both sides of the forbidden interval, and the clause is given by~\eqref{eq:forbid_3}. Notably, $L$ is used only in~\eqref{eq:forbid_2} and~\eqref{eq:forbid_3}, whereas $R$ is used only in~\eqref{eq:forbid_1} and~\eqref{eq:forbid_3}. Therefore, each boundary index is defined only in the cases where the corresponding side of $D_w$ exists.
+
+Case~6 occurs when every value in $D_w$ lies in the forbidden interval induced by $D_{v,j}$. In the current formulation, this case is eliminated by preprocessing, whereas without preprocessing it can be encoded directly by the unary clause $\neg b_{v,j}$. 
+% The clause count follows directly from~\eqref{eq:forbid_2}--\eqref{eq:forbid_3}. For each fixed assignment $b_{v,j}$ and adjacent transmitter $w$, POSE introduces at most one boundary implication, depending on the relative position between the forbidden interval and $D_w$. Hence, for one oriented interference edge from $v$ to $w$, POSE requires $\mathcal{O}(|D_v|)$ such implications, whereas DSE may require $\mathcal{O}(|D_v||D_w|)$ pairwise conflict clauses.
+% The clause count follows directly from the boundary clauses in~\eqref{eq:forbid_2}--\eqref{eq:forbid_3}. For each fixed assignment $b_{v,j}$ and adjacent transmitter $w$, POSE introduces at most one corresponding boundary implication, depending on the relative position between the forbidden interval and $D_w$. Hence, for one oriented interference edge from $v$ to $w$, POSE requires $\mathcal{O}(|D_v|)$ such boundary implications, whereas DSE may require $\mathcal{O}(|D_v||D_w|)$ pairwise conflict clauses.
+
+The formulas also provide a simple estimate of the clause counts for the DSE and POSE interference encodings. From~\eqref{eq:forbid_2},~\eqref{eq:forbid_1}, and~\eqref{eq:forbid_3}, each fixed assignment $b_{v,j}$ and adjacent transmitter $w$ generates at most one boundary implication, because the forbidden interval falls into exactly one of the relevant relative-position cases. Therefore, over all $|D_v|$ candidate assignments of transmitter $v$, one oriented interference edge from $v$ to $w$ generates at most $\mathcal{O}(|D_v|)$ POSE boundary implications. In contrast, DSE checks every pair of candidate frequencies $(D_{v,j},D_{w,j'})$ and adds a conflict clause whenever $|D_{v,j}-D_{w,j'}|\le d_{vw}$. In the worst case, all $|D_v||D_w|$ pairs may be forbidden, yielding $\mathcal{O}(|D_v||D_w|)$ pairwise conflict clauses. Proposition~\ref{prop:pose_correctness} establishes that the POSE boundary implications preserve the same feasible assignments as the DSE pairwise interference clauses.
+
+\begin{figure}[]
+\centering
 \def\xCenter{4.5}
 \def\d{2}
 \def\fMin{\xCenter-\d} % 2.5
 \def\fMax{\xCenter+\d} % 6.5
-
 \newcommand{\drawBase}[2]{
-    % Vùng cấm màu đỏ
     \fill[forbidden] (\fMin, #1-0.3) rectangle (\fMax, #1+0.7);
     \draw[red, dashed, thick] (\fMin, #1-0.3) -- (\fMin, #1+0.7);
     \draw[red, dashed, thick] (\fMax, #1-0.3) -- (\fMax, #1+0.7);
 
-    % Trục f vẽ sau để nổi lên trên
     \draw[axis] (0, #1) -- (9.5, #1) node[right] {$f \in D$};
 
-    % Đánh dấu tâm D_{v,j} và giới hạn
     \draw[thick] (\xCenter, #1-0.1) -- (\xCenter, #1+0.1);
     \node[below, font=\footnotesize] at (\xCenter, #1) {$D_{v,j}$};
     \node[red, below, font=\footnotesize] at (\fMin, #1) {$D_{v,j}-d_{vw}$};
     \node[red, below, font=\footnotesize] at (\fMax, #1) {$D_{v,j}+d_{vw}$};
 
-    % Tên Case
     \node[left, font=\bfseries] at (-0.5, #1+0.3) {#2};
 }
 
@@ -370,30 +485,8 @@ Case~6 occurs when every value in $D_w$ lies in the forbidden interval induced b
 \caption{Relative positions between the forbidden interval $[D_{v,j}-d_{vw},D_{v,j}+d_{vw}]$ and the domain $D_w$. Red segments denote forbidden values in $D_w$, and green segments denote the remaining values in $D_w$.}
 \label{fig:domain_pruning_cases}
 \end{figure}
-\begin{align}
-    b_{v,j} &\rightarrow \neg g_{w,L+1},
-    \notag\\
-    &\quad
-    L=\operatorname{arg\,max}_{k}
-    \{k\mid D_{w,k}<D_{v,j}-d_{vw}\}
-    \label{eq:forbid_2}\\[2pt]
-    b_{v,j} &\rightarrow g_{w,R},
-    \notag\\
-    &\quad
-    R=\operatorname{arg\,min}_{k}
-    \{k\mid D_{w,k}>D_{v,j}+d_{vw}\}
-    \label{eq:forbid_1}\\[2pt]
-    b_{v,j} &\rightarrow (\neg g_{w,L+1}\lor g_{w,R}),
-    \notag\\
-    &\quad
-    L=\operatorname{arg\,max}_{k}
-    \{k\mid D_{w,k}<D_{v,j}-d_{vw}\},
-    \notag\\
-    &\quad
-    R=\operatorname{arg\,min}_{k}
-    \{k\mid D_{w,k}>D_{v,j}+d_{vw}\}
-    \label{eq:forbid_3}
-\end{align}
+ 
+
 \begin{proposition}
 \label{prop:pose_correctness}
 For the preprocessed domains, POSE ensures that each transmitter is assigned exactly one frequency. More precisely, constraints~\eqref{eq:g_b_connect}--\eqref{eq:g_propagation} are equivalent to the DSE constraint~\eqref{eq:sat_domain}.
@@ -521,7 +614,7 @@ These search iterations could be executed as independent SAT calls, where each n
 \\
 \midrule
 \textit{Step 5} & \textbf{While} $UB>1$ \textbf{do}: \\
-& \quad Set $k\leftarrow UB-1$ and solve $F$ with the corresponding assumption: the \texttt{ITotalizer} assumption $-\texttt{rhs}[k]$ enforcing At-Most-$k$ for INC, or $\neg S_{N,k+1}$ for INCSC. \\
+& \quad Set $k\leftarrow UB-1$ and solve $F$ with the corresponding bound. For INC, use the \texttt{ITotalizer} assumption $-\texttt{rhs}[k]$ to enforce At-Most-$k$. For INCSC, use the assumption $\neg S_{N,k+1}$ when \(k<K\). \\
 & \quad \textbf{If} the call is \texttt{UNSAT}, \textbf{return} \texttt{OPT} with $\mathit{best}$ and $UB$. \\
 & \quad Set $\mathit{best}\leftarrow$ the returned feasible assignment. \\
 & \quad Set $UB\leftarrow$ the number of assigned frequencies in $\mathit{best}$. \\
@@ -639,16 +732,10 @@ T9.5 & TUD916.5 & Minimum Interference & 916 & 5213 \\
 \bottomrule
 \end{tabular}
 \end{table}
-
 % For clarity, we denote the two SAT encodings as \textbf{DSE} (Direct SAT Encoding) and \textbf{POSE} (Proposed Order-based SAT Encoding). We also consider two incremental optimization strategies: \textbf{INC}, which employs \texttt{ITotalizer} for incremental cardinality constraints, and \textbf{INCSC}, which utilizes the Sequential Counter encoding described in Section~\ref{subsec:incremental_sat}. A complete solver configuration is named by combining one encoding and one optimization strategy; therefore, \textbf{POSE+INCSC} denotes the proposed method, while \textbf{POSE+INC} and \textbf{DSE+INCSC} are used as ablation baselines.
 % The proposed framework is further compared against Gurobi, CPLEX-CP, and CPLEX-MIP.
 % The proposed framework is further compared against three commercial exact solvers: Gurobi (v12.0.3), CPLEX-CP, and CPLEX-MIP (IBM ILOG CPLEX Optimization Studio v12.1.1), where CPLEX-CP and CPLEX-MIP denote the constraint programming and mixed-integer programming modes of CPLEX, respectively.
 % The SAT-based methods differ in terms of how the feasibility constraints and the objective function are handled. For the feasibility constraints, DSE and POSE correspond to the encodings described in Sections~\ref{subsec:sat_encoding} and~\ref{subsec:order_encoding}, respectively. CARD keeps the same modeling target as DSE but replaces the SAT encodings of~\eqref{eq:sat_domain} and~\eqref{eq:sat_ineq}, which correspond to~\eqref{eq:ilp_domain} and~\eqref{eq:ilp_ineq}, by PySAT cardinality encodings. For the objective function, INC and INCSC correspond to the incremental SAT strategies described in Section~\ref{subsec:incremental_sat}. The proposed framework is further compared against Gurobi, CPLEX-CP, CPLEX-MIP, CP-SAT, and MaxSAT+POSE. Here, CPLEX-CP and CPLEX-MIP denote the constraint programming and mixed-integer programming models of CPLEX, respectively. Table~\ref{tab:method_notation} summarizes the method names used in the experimental results.
-The SAT-based methods differ in terms of how the feasibility constraints and the objective function are handled. For the feasibility constraints, DSE and POSE correspond to the encodings described in Sections~\ref{subsec:sat_encoding} and~\ref{subsec:order_encoding}, respectively, while CARD uses PySAT cardinality encodings for~\eqref{eq:sat_domain} and~\eqref{eq:sat_ineq}. For the objective function, INC and INCSC correspond to the incremental SAT strategies described in Section~\ref{subsec:incremental_sat}.
-The proposed framework is further compared against Gurobi, CPLEX-CP, CPLEX-MIP, CP-SAT, and MaxSAT+POSE. Table~\ref{tab:method_notation} summarizes the method names used in the experimental results.
-
-Each run is reported with one of three final statuses. \texttt{OPT} denotes that the solver certifies the minimum number of assigned frequencies, \texttt{INF} denotes that the instance is proven infeasible, and \texttt{TO} denotes that the run reaches the 600-second time limit without a certificate. When total solving time is computed, each \texttt{TO} run is counted as 600 seconds. Details on the benchmark data, experimental results, and source code are provided in the Data and Code Availability statement.
-
 \begin{table}[!htbp]
 \centering
 \caption{Methods compared in the experiments}
@@ -656,160 +743,246 @@ Each run is reported with one of three final statuses. \texttt{OPT} denotes that
 \scriptsize
 \setlength{\tabcolsep}{3pt}
 \renewcommand{\arraystretch}{1.05}
-\begin{tabular}{@{}lp{0.72\columnwidth}@{}}
+\begin{tabular}{@{}p{0.32\columnwidth}p{0.63\columnwidth}@{}}
 \toprule
 \textbf{Method} & \textbf{Description} \\
 \midrule
 \multicolumn{2}{@{}l}{\textit{SAT encodings and objective strategies}} \\
 DSE & Direct SAT encoding with pairwise interference clauses. \\
-CARD & Cardinality-based SAT encoding for~\eqref{eq:sat_domain} and~\eqref{eq:sat_ineq} using PySAT Exactly-One and At-Most-One encodings. \\
+CARD-Seq & Cardinality-based SAT encoding for~\eqref{eq:sat_domain} and~\eqref{eq:sat_ineq} using PySAT Sequential Counter encodings. \\
 POSE & Proposed order-based SAT encoding. \\
 INC & Incremental SAT optimization using \texttt{ITotalizer}. \\
 INCSC & Incremental SAT optimization using Sequential Counter. \\
+MaxSAT-RC2 & MaxSAT optimization using PySAT RC2 with hard feasibility clauses and unit soft clauses over the global frequency-usage variables $A_m$. \\
 \midrule
-\multicolumn{2}{@{}l}{\textit{SAT configurations}} \\
+\multicolumn{2}{@{}l}{\textit{Main SAT configuration}} \\
+POSE+INCSC & POSE combined with INCSC. \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Feasibility-encoding comparison with INCSC}} \\
+POSE+INCSC & POSE combined with INCSC. \\
 DSE+INCSC & DSE combined with INCSC. \\
+CARD-Seq+INCSC & CARD-Seq combined with INCSC. \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Objective-optimization comparison with POSE}} \\
+POSE+INCSC & POSE combined with INCSC. \\
 POSE+INC & POSE combined with INC. \\
-POSE+INCSC & POSE combined with INCSC. (Main proposed SAT configuration)\\
+POSE+MaxSAT-RC2 & POSE combined with MaxSAT-RC2. \\
 \midrule
 \multicolumn{2}{@{}l}{\textit{Baseline methods}} \\
 Gurobi & Gurobi MIP solver (v12.0.3). \\
 CPLEX-CP & CP model in CPLEX Optimization Studio (v12.1.1). \\
 CPLEX-MIP & MIP model in CPLEX Optimization Studio (v12.1.1). \\
 CP-SAT & CP-SAT solver in Google OR-Tools (v9.15.6755). \\
-MaxSAT+POSE & MaxSAT formulation with POSE constraints solved by RC2. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:method_notation} summarizes the method names used in the experimental results.
+The SAT-based methods differ in terms of how the feasibility constraints and the objective function are handled. For the feasibility constraints, DSE and POSE correspond to the encodings described in Sections~\ref{subsec:sat_encoding} and~\ref{subsec:order_encoding}, respectively.
+In addition to DSE and POSE, CARD denotes cardinality-based SAT encodings that encode~\eqref{eq:sat_domain} as an Exactly-One constraint and encode~\eqref{eq:sat_ineq} through At-Most-One constraints using PySAT.
+Among the evaluated CARD variants, including Totalizer (CARD-Totalizer) and Cardinality Network (CARD-CardNet) encodings, Sequential Counter (CARD-Seq) is selected as the representative CARD baseline in the main results. The detailed results for CARD-Totalizer and CARD-CardNet are reported in Table~\ref{tab:appendix_sat_core_preprocess}.
+
+% For the objective function, INC and INCSC correspond to the incremental SAT strategies described in Section~\ref{subsec:incremental_sat}. In addition to INC and INCSC, MaxSAT is included as a baseline for objective-function optimization. In this baseline, the feasibility constraints and the usage-linking clauses~\eqref{eq:active_link} are added as hard clauses, while each global frequency-usage variable $A_m$ contributes a unit soft clause $\neg A_m$ with weight one.
+For the objective function, INC and INCSC correspond to the incremental SAT strategies described in Section~\ref{subsec:incremental_sat}. 
+MaxSAT-RC2 is included in the main results as an objective-optimization baseline.
+In this MaxSAT-RC2 formulation, the feasibility constraints and the usage-linking clauses~\eqref{eq:active_link} are added as hard clauses, while each global frequency-usage variable $A_m$ contributes a unit soft clause $\neg A_m$ with weight one. 
+Results for an additional MaxSAT solver, EvalMaxSAT (POSE+EvalMaxSAT), are reported in Table~\ref{tab:appendix_solver_baselines_preprocess}.
+
+The proposed framework is further compared against several commonly used optimization solvers, including Gurobi, CPLEX-CP, CPLEX-MIP, and OR-Tools CP-SAT.
+All methods were also run under the same external limits of 600 seconds and 14,000 MB memory using \texttt{runlim}. Gurobi, CPLEX-CP, and OR-Tools CP-SAT used their default solver configurations. CPLEX-MIP also used its standard solver configuration, except that zero MIP gap was set to require an exact optimality certificate and its built-in presolve routine was enabled.
+
+The outcome of each evaluated method on each benchmark instance is reported using one of three final statuses. \texttt{OPT} denotes that optimality is certified, \texttt{INF} denotes that the instance is proven infeasible, and \texttt{TO} denotes that the run reaches the 600-second time limit without a certificate. When cumulative solving time is reported, each \texttt{TO} run is counted as 600 seconds. Details on the benchmark data, experimental results, and source code are provided in the Data and Code Availability statement.
+
+\subsection{Evaluation of Domain Preprocessing}
+% Problem reduction through preprocessing is highly effective for reducing the size of the initial problem formulation. The empirical data, visually summarized in the scatter plot in Fig.~\ref{fig:preprocess_scatter}, reveals that preprocessing acts as a powerful catalyst for both the SAT-based models and commercial solvers. Specifically, for the proposed POSE+INCSC, pruning invalid frequency domains successfully accelerates the search process in 80.00\% of the overall instances (28 out of 35). Moreover, it effectively rescues CPLEX-MIP and CPLEX-CP from severe time limitations in 2 and 1 highly constrained instances, respectively. 
+% The most profound impact, however, is observed in the 13 inherently infeasible (\texttt{INF}) instances, where the preprocessing technique accelerates the execution time in 100\% of the cases for POSE+INCSC, DSE+INCSC, Gurobi, and CPLEX-MIP. Many instances in the standard benchmark datasets were originally designed for other objectives (e.g., MS-FAP or MI-FAP) and have thus been reformulated to evaluate the MO-FAP. Because these original instances were already strictly constrained for their initial targets, the margin for further minimizing the number of assigned frequencies is extremely narrow. Nevertheless, the core purpose of utilizing these modified instances is to rigorously test the exact solvers' capability in search space pruning and proving infeasibility (\texttt{UNSAT}). Powered by the domain preprocessing technique combined with the SAT's unit propagation mechanism, the proposed model demonstrates an outstanding ability to certify the \texttt{UNSAT} status almost instantaneously. As observed in Fig.~\ref{fig:preprocess_scatter}, the vast majority of data points gravitate toward the region below the $y=x$ boundary, representing a consistent performance gain across a wide range of problem complexities.
+% Domain preprocessing substantially reduces the initial formulation. As shown in Fig.~\ref{fig:preprocess_scatter}, it speeds up POSE+INCSC on 28 of the 35 instances and also mitigates severe time degradation for CPLEX-MIP and CPLEX-CP on several hard cases. The effect is especially clear on the 13 infeasible (\texttt{INF}) instances, where preprocessing improves solving time in every case for POSE+INCSC, DSE+INCSC, Gurobi, and CPLEX-MIP. Many of these instances were reformulated from other FAP objectives, making them suitable for evaluating search-space pruning and infeasibility certification. 
+% Most points in Fig.~\ref{fig:preprocess_scatter} lie below the $y=x$ line, indicating that preprocessing consistently reduces solving time across a broad range of instances, with the clearest gains observed on the infeasible (\texttt{INF}) cases.
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=0.7\columnwidth]{image/iv_b_runtime_scatter_by_solver.pdf} 
+    \caption{Solving time with and without domain preprocessing on 35 benchmark instances.}
+    \label{fig:preprocess_scatter}
+\end{figure}
+% This experiment evaluates the contribution of domain preprocessing to the solving process. As shown in Fig.~\ref{fig:preprocess_scatter}, POSE+INCSC is faster with preprocessing on 28 of the 35 instances. The same comparison is also reported for POSE+INC, DSE+INCSC, CARD-Seq+INCSC, POSE+MaxSAT-RC2, Gurobi, CPLEX-MIP, CPLEX-CP, and CP-SAT.
+% This experiment evaluates the contribution of domain preprocessing to the solving process. As shown in Fig.~\ref{fig:preprocess_scatter}, POSE+\allowbreak INCSC is faster with preprocessing on 28 of the 35 instances. The same comparison is also reported for POSE+\allowbreak INC, DSE+\allowbreak INCSC, CARD-\allowbreak Seq+\allowbreak INCSC, POSE+\allowbreak MaxSAT-\allowbreak RC2, Gurobi, CPLEX-\allowbreak MIP, CPLEX-\allowbreak CP, and CP-\allowbreak SAT.
+% The effect is particularly visible on the 13 infeasible (\texttt{INF}) instances, where preprocessing reduces the time required to prove infeasibility for both POSE+INCSC and DSE+INCSC. For Gurobi and CPLEX-MIP, it reduces the solving time on all infeasible instances. Overall, most points in Fig.~\ref{fig:preprocess_scatter} lie below the $y=x$ line, indicating that preprocessing is beneficial in this evaluation. A few points lie above the diagonal, but most of these points remain close to it, indicating that the slowdown is usually limited when preprocessing is not beneficial.
+
+% This experiment evaluates how domain preprocessing affects solving time and infeasibility certification. As shown in Fig.~\ref{fig:preprocess_scatter}, many points in the upper-left and middle regions lie close to the $y=x$ line, indicating that preprocessing has a limited effect on those runs. In contrast, the points in the lower-right region are farther below the diagonal, showing larger reductions in solving time when preprocessing is enabled. This pattern is especially clear for infeasible (\texttt{INF}) instances, whose markers frequently move to the low-runtime region after preprocessing. For POSE+INCSC, preprocessing reduces solving time on 28 of the 35 instances. The same comparison is also reported for POSE+INC, DSE+INCSC, CARD-Seq+INCSC, POSE+MaxSAT-RC2, Gurobi, CPLEX-MIP, CPLEX-CP, and CP-SAT.
+This experiment examines whether domain preprocessing reduces solving time for the evaluated methods shown in Fig.~\ref{fig:preprocess_scatter}. 
+Overall, preprocessing improves solving time for most of the evaluated methods on a substantial subset of instances, with the clearest effect observed on infeasible (\texttt{INF}) instances. For POSE+INCSC, enabling preprocessing reduces solving time on 28 of the 35 instances. 
+In Fig.~\ref{fig:preprocess_scatter}, points close to the $y=x$ line correspond to runs where preprocessing has limited effect, whereas points below the diagonal indicate faster solving after preprocessing. The largest reductions are mainly associated with infeasible instances, where inconsistent domain values can be removed before the main solving process.
+
+\subsection{Evaluation of the Proposed Order-Based SAT Encoding}
+
+\begin{table}[!htbp]
+\centering
+\caption{Number of variables and clauses in the SAT encodings of the assignment, exact-distance, and interference constraints for instances not eliminated by preprocessing.}
+\label{tab:hard_encoding_full}
+\scriptsize
+\setlength{\tabcolsep}{2.2pt}
+\renewcommand{\arraystretch}{1.0}
+\begin{tabular}{@{}lrrrrrrrrrr@{}}
+\toprule
+\multirow{2}{*}{\textbf{Inst.}} & \multicolumn{5}{c}{\textbf{Variables}} & \multicolumn{5}{c}{\textbf{Clauses}} \\
+\cmidrule(lr){2-6}\cmidrule(lr){7-11}
+& \textbf{DSE} & \textbf{POSE} & \textbf{P/D} & \textbf{CARD} & \textbf{C/D} & \textbf{DSE} & \textbf{POSE} & \textbf{P/D} & \textbf{CARD} & \textbf{C/D} \\
+\midrule
+C01 & \textbf{36,200} & 72,400 & 200 & 692,321 & 1912 & 1,446,348 & \textbf{355,326} & 25 & 1,982,888 & 137 \\
+C02 & \textbf{8,004} & 16,008 & 200 & 181,777 & 2271 & 349,519 & \textbf{82,133} & 23 & 522,669 & 150 \\
+C03 & \textbf{15,892} & 31,784 & 200 & 362,247 & 2279 & 702,647 & \textbf{173,390} & 25 & 1,047,531 & 149 \\
+C04 & \textbf{1,960} & 3,920 & 200 & 5,783 & 295 & \textbf{10,472} & 11,930 & 114 & 12,729 & 122 \\
+C05 & \textbf{3,722} & 7,444 & 200 & 73,726 & 1981 & 107,224 & \textbf{26,565} & 25 & 205,588 & 192 \\
+C11 & \textbf{26,856} & 53,712 & 200 & 548,487 & 2042 & 1,105,353 & \textbf{268,996} & 24 & 1,573,495 & 142 \\
+G01 & \textbf{6,920} & 13,840 & 200 & 71,739 & 1037 & 206,786 & \textbf{62,950} & 30 & 196,572 & 95 \\
+G02 & \textbf{14,624} & 29,248 & 200 & 172,559 & 1180 & 475,829 & \textbf{139,391} & 29 & 478,208 & 100 \\
+G03 & \textbf{7,480} & 14,960 & 200 & 463,875 & 6202 & 598,543 & \textbf{71,704} & 12 & 1,341,243 & 224 \\
+G04 & \textbf{14,816} & 29,632 & 200 & 904,601 & 6106 & 1,168,001 & \textbf{140,881} & 12 & 2,615,266 & 224 \\
+G08 & \textbf{25,628} & 51,256 & 200 & 389,284 & 1519 & 906,033 & \textbf{236,932} & 26 & 1,079,747 & 119 \\
+G09 & \textbf{36,092} & 72,184 & 200 & 573,735 & 1590 & 1,299,985 & \textbf{352,970} & 27 & 1,599,202 & 123 \\
+G10 & \textbf{26,594} & 53,188 & 200 & 1,781,951 & 6701 & 2,273,085 & \textbf{256,868} & 11 & 5,163,511 & 227 \\
+G14 & \textbf{36,716} & 73,432 & 200 & 462,509 & 1260 & 1,204,487 & \textbf{334,704} & 28 & 1,269,682 & 105 \\
+T2.1 & \textbf{7,986} & 15,972 & 200 & 173,596 & 2174 & 339,265 & \textbf{78,025} & 23 & 493,586 & 145 \\
+T2.2 & \textbf{200} & 400 & 200 & \textbf{200} & 100 & \textbf{300} & 1,286 & 429 & \textbf{300} & 100 \\
+T2.3 & \textbf{7,066} & 14,132 & 200 & 153,407 & 2171 & 288,705 & \textbf{66,557} & 23 & 433,731 & 150 \\
+T2.4 & \textbf{624} & 1,248 & 200 & 5,275 & 845 & 9,049 & \textbf{4,050} & 45 & 13,974 & 154 \\
+T9.1 & \textbf{33,572} & 67,144 & 200 & 705,399 & 2101 & 1,380,601 & \textbf{306,313} & 22 & 2,000,264 & 145 \\
+T9.2 & \textbf{1,180} & 2,360 & 200 & 1,454 & 123 & 2,490 & 7,147 & 287 & \textbf{2,312} & 93 \\
+T9.3 & \textbf{34,386} & 68,772 & 200 & 756,304 & 2199 & 1,443,466 & \textbf{329,553} & 23 & 2,144,292 & 149 \\
+T9.4 & \textbf{2,886} & 5,772 & 200 & 9,100 & 315 & \textbf{15,888} & 16,813 & 106 & 20,280 & 128 \\
+\midrule
+\multicolumn{11}{@{}l}{\scriptsize P/D and C/D are percentages relative to DSE.} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+\centering
+\caption{Number of benchmark instances certified by each SAT encoding after preprocessing.}
+\label{tab:pose_encoding_certification}
+\footnotesize
+\setlength{\tabcolsep}{2.2pt}
+\begin{tabular}{lrrrrr}
+\toprule
+Method & \#OPT & \#INF & \#TO & \#Certified & Total time (s) \\
+\midrule
+POSE+INCSC & 22 & 13 & 0 & 35/35 & 599.94 \\
+DSE+INCSC & 13 & 13 & 9 & 26/35 & 5723.34 \\
+CARD-Seq+INCSC & 13 & 13 & 9 & 26/35 & 5786.33 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 
 
-\subsection{Evaluation of Domain Preprocessing}
-\begin{figure}[!htbp]
-    \centering
-    \includegraphics[width=0.95\columnwidth]{image/iv_b_runtime_scatter_by_solver.pdf} 
-    \caption{Solving time with and without domain preprocessing on 35 benchmark instances.}
-    \label{fig:preprocess_scatter}
-\end{figure}
-
-% Problem reduction through preprocessing is highly effective for reducing the size of the initial problem formulation. The empirical data, visually summarized in the scatter plot in Fig.~\ref{fig:preprocess_scatter}, reveals that preprocessing acts as a powerful catalyst for both the SAT-based models and commercial solvers. Specifically, for the proposed POSE+INCSC, pruning invalid frequency domains successfully accelerates the search process in 80.00\% of the overall instances (28 out of 35). Moreover, it effectively rescues CPLEX-MIP and CPLEX-CP from severe time limitations in 2 and 1 highly constrained instances, respectively. 
-% The most profound impact, however, is observed in the 13 inherently infeasible (\texttt{INF}) instances, where the preprocessing technique accelerates the execution time in 100\% of the cases for POSE+INCSC, DSE+INCSC, Gurobi, and CPLEX-MIP. Many instances in the standard benchmark datasets were originally designed for other objectives (e.g., MS-FAP or MI-FAP) and have thus been reformulated to evaluate the MO-FAP. Because these original instances were already strictly constrained for their initial targets, the margin for further minimizing the number of assigned frequencies is extremely narrow. Nevertheless, the core purpose of utilizing these modified instances is to rigorously test the exact solvers' capability in search space pruning and proving infeasibility (\texttt{UNSAT}). Powered by the domain preprocessing technique combined with the SAT's unit propagation mechanism, the proposed model demonstrates an outstanding ability to certify the \texttt{UNSAT} status almost instantaneously. As observed in Fig.~\ref{fig:preprocess_scatter}, the vast majority of data points gravitate toward the region below the $y=x$ boundary, representing a consistent performance gain across a wide range of problem complexities.
-% Domain preprocessing substantially reduces the initial formulation. As shown in Fig.~\ref{fig:preprocess_scatter}, it speeds up POSE+INCSC on 28 of the 35 instances and also mitigates severe time degradation for CPLEX-MIP and CPLEX-CP on several hard cases. The effect is especially clear on the 13 infeasible (\texttt{INF}) instances, where preprocessing improves solving time in every case for POSE+INCSC, DSE+INCSC, Gurobi, and CPLEX-MIP. Many of these instances were reformulated from other FAP objectives, making them suitable for evaluating search-space pruning and infeasibility certification. 
-% Most points in Fig.~\ref{fig:preprocess_scatter} lie below the $y=x$ line, indicating that preprocessing consistently reduces solving time across a broad range of instances, with the clearest gains observed on the infeasible (\texttt{INF}) cases.
-
-This experiment evaluates the contribution of domain preprocessing to the solving process. As shown in Fig.~\ref{fig:preprocess_scatter}, POSE+INCSC is faster with preprocessing on 28 of the 35 instances. The effect is particularly visible on the 13 infeasible (\texttt{INF}) instances, where preprocessing reduces the time required to prove infeasibility for both POSE+INCSC and DSE+INCSC.
-The preprocessing step also affects the other exact solvers considered in this study. For CPLEX-MIP and CPLEX-CP, it avoids large slowdowns on several difficult instances. For Gurobi and CPLEX-MIP, it reduces the solving time on all infeasible instances. Overall, most points in Fig.~\ref{fig:preprocess_scatter} lie below the $y=x$ line, indicating that preprocessing is beneficial in this evaluation.
-
-\subsection{Evaluation of the Proposed Order-Based SAT Encoding}
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=\columnwidth]{image/pose_vs_dse_scatter.pdf}
-% \caption{Log-log scatter plot comparing the execution times of DSE+INCSC and POSE+INCSC across 35 instances. The dashed line $y=x$ represents equal performance. Points located below this line indicate that POSE is faster.}
-\caption{Comparison of solving time between DSE+INCSC and POSE+INCSC on 35 benchmark instances.}
-\label{fig:pose_vs_dse_scatter}
+\includegraphics[width=\columnwidth]{image/pose_encoding_pair_scatter.pdf}
+\caption{Comparison of solving time between POSE+INCSC and two SAT encoding baselines, DSE+INCSC and CARD-Seq+INCSC, on 35 benchmark instances.}
+\label{fig:pose_encoding_pair_scatter}
 \end{figure}
+
+
 
 % % This experiment evaluates the computational performance of POSE against DSE baseline, with both utilizing domain preprocessing and the \textit{INCSC} strategy. 
 % This experiment compares POSE against DSE under the same domain preprocessing and \textit{INCSC} strategy.
-% Table~\ref{tab:super_master} provides the full numerical breakdown of these results, while Fig.~\ref{fig:pose_vs_dse_scatter} visualizes the execution time disparity on a logarithmic scale.
 % % The empirical data strongly validates the comprehensive superiority of POSE over the direct encoding approach in terms of both execution time and overall convergence capability. 
 % % In particular, POSE successfully solves and mathematically certifies all 35 instances within the 600-second limit, achieving an absolute success rate of 100\%. 
 % POSE successfully solves and mathematically certifies all 35 instances within the 600-second limit.
 % As clearly depicted by the distribution of data points falling entirely below the $y=x$ reference line, the proposed POSE model consistently operates at a higher speed than the baseline.
-% In contrast, representing the interference constraints via discrete Boolean variables causes DSE to suffer from severe combinatorial explosions. This vulnerability is visually pronounced in Fig.~\ref{fig:pose_vs_dse_scatter} by the distinct cluster of points pinned against the 600-second vertical boundary, highlighting the 9 highly constrained networks (such as the \texttt{C01}--\texttt{C03}, \texttt{C11}, and \texttt{G01}, \texttt{G02}, \texttt{G08}--\texttt{G10} series) where DSE becomes entirely intractable (\texttt{TO}). Even on instances where DSE manages to converge, POSE maintains a processing speed up to an order of magnitude faster, as highlighted by instances \texttt{T2.1} (2.74s vs. 42.02s) and \texttt{G14} (8.64s vs. 106.29s). 
 % % Overall, the structural efficiency of POSE reduces the cumulative execution time across all 35 instances from 5723.34 seconds to merely 599.94 seconds, representing an aggregate computational savings of approximately 89.52\%.
 % Overall, the structural efficiency of POSE reduces the penalized cumulative execution time across all 35 instances from 5723.34 seconds (which includes the 600-second timeout penalties for the 9 uncertified instances) to merely 599.94 seconds, representing an aggregate computational savings of approximately 89.52\%.
 
 % The structural power of the proposed encoding is further underscored by inherently infeasible instances (\texttt{INF}). To conclusively certify an \texttt{INF} status (i.e., \texttt{UNSAT}), the exact solver is compelled to exhaustively traverse and prune the entire search space. The results demonstrate that POSE reaches the \texttt{UNSAT} conclusion strictly faster than, or equivalently to, DSE in 100\% of these test cases. This consistent disparity serves as robust evidence for the efficacy of the proposed order-based interference encoding, demonstrating that the established auxiliary variables $g$ effectively accelerate the unit propagation process without introducing computational overhead.
-This experiment compares POSE+INCSC and DSE+INCSC under the same domain preprocessing, using the same INCSC strategy.
-Table~\ref{tab:super_master} reports, for each instance and solver, the obtained solution value (\textbf{Sol.}), the solving time in seconds (\textbf{Time}), and the final solving status (\textbf{Status}), while Fig.~\ref{fig:pose_vs_dse_scatter} visualizes the difference in solving time.
+This experiment evaluates the effect of the SAT encoding used for the assignment, exact-distance, and interference constraints while keeping the objective-function strategy fixed. We compare POSE, DSE, and CARD-Seq, each combined with INCSC and domain preprocessing. The comparison considers three aspects: the number of variables and clauses generated by these constraint encodings, the reported objective values and certification statuses, and the solving time. 
+The complete per-instance results are provided in Table~\ref{tab:appendix_sat_core_preprocess}, where \textit{Sol.} denotes the reported number of assigned frequencies, \textit{Time} is the solving time in seconds, and \textit{Status} is one of \texttt{OPT}, \texttt{INF}, or \texttt{TO}.
+ 
+Table~\ref{tab:hard_encoding_full} reports the number of variables and clauses generated by DSE, POSE, and CARD-Seq when encoding the assignment, exact-distance, and interference constraints after preprocessing. The columns P/D and C/D report the percentage ratios of POSE to DSE and CARD-Seq to DSE, respectively. POSE introduces one order variable per domain value in addition to the assignment variables, so its number of variables is about twice that of DSE. In return, each selected frequency is handled through boundary clauses over the ordered domain of the adjacent transmitter, rather than by enumerating all conflicting frequency pairs. As a result, POSE generates fewer clauses than DSE on 18 of the 22 instances not eliminated by preprocessing. The four exceptions correspond to instances where the interference constraints generate only a small number of incompatible frequency pairs for DSE after preprocessing, while POSE still introduces the order variables and their linking/propagation clauses.
+CARD-Seq reduces the need to list every incompatible pair of frequencies explicitly, but it encodes each Exactly-One and At-Most-One constraint separately using Sequential Counter encodings. Since the auxiliary variables introduced for one cardinality constraint are not reused by other constraints, CARD-Seq produces many additional variables and clauses, which explains its much larger variable counts in Table~\ref{tab:hard_encoding_full}.
 
-POSE+INCSC successfully solves and mathematically certifies all 35 instances within the 600-second limit. In contrast, DSE+INCSC exhibits significant scalability limitations, timing out on 9 highly constrained instances, including \texttt{C01}--\texttt{C03}, \texttt{C11}, \texttt{G01}, \texttt{G02}, and \texttt{G08}--\texttt{G10}. This gap is clearly reflected in Fig.~\ref{fig:pose_vs_dse_scatter} by the cluster of DSE+INCSC points near the 600-second boundary. Even when both methods successfully solve the instance, POSE+INCSC remains substantially faster, e.g., \texttt{T2.1} (2.74s vs. 42.02s) and \texttt{G14} (8.64s vs. 106.29s). Overall, POSE+INCSC reduces the penalized cumulative solving time across all 35 instances from 5723.34 seconds to 599.94 seconds, corresponding to a reduction of 89.52\%.
+The columns \#OPT, \#INF, and \#TO denote the numbers of instances with the corresponding final statuses, and total time is the cumulative solving time over all benchmark instances, including timeout runs. The same status notation is used in the remaining result tables. Across all instances for which a feasible value is reported, POSE+INCSC, DSE+INCSC, and CARD-Seq+INCSC return the same objective value. 
+The main difference is therefore not the reported value, but the ability to certify it. POSE+INCSC certifies all 35 instances, whereas DSE+INCSC and CARD-Seq+INCSC each certify 26 instances and time out on 9 instances. On those 9 timeout instances, POSE+INCSC proves optimality within the time limit.
 
-The advantage of POSE+INCSC is also clear on the infeasible (\texttt{INF}) instances. Across all such cases, POSE+INCSC reaches the \texttt{UNSAT} conclusion strictly faster than, or equivalently to, DSE+INCSC. This consistent disparity further supports the effectiveness of the proposed order-based interference encoding on infeasible cases.
-
+Figure~\ref{fig:pose_encoding_pair_scatter} compares the solving time of POSE+INCSC with DSE+INCSC and CARD-Seq+INCSC. Points below the diagonal indicate that POSE+INCSC is faster. When comparing solving time, most infeasible instances in the reported results should be interpreted separately because they are detected during domain preprocessing. Therefore, the runtime differences among the encodings are more informative on feasible instances. In addition to certifying 9 more instances as optimal, as discussed above, POSE+INCSC is faster than both DSE+INCSC and CARD-Seq+INCSC on several instances whose solving time exceeds one second. For sub-second instances, this advantage is less clear, and CARD-Seq+INCSC is faster in several cases. However, these points remain close to the $y=x$ line, indicating that the absolute differences are small. 
+This trend is also reflected in Table~\ref{tab:pose_encoding_certification}, where the total time is 599.94 seconds for POSE+INCSC, compared with 5723.34 seconds for DSE+INCSC and 5786.33 seconds for CARD-Seq+INCSC. This gap should be interpreted under the reported timeout setting, because the totals include 9 timeout runs for DSE+INCSC and CARD-Seq+INCSC. The detailed per-instance results in Table~\ref{tab:appendix_sat_core_preprocess} show larger speedups over CARD-Seq+INCSC on instances such as \texttt{G03}, \texttt{G04}, \texttt{G14}, \texttt{T2.1}, \texttt{T2.3}, \texttt{T9.1}, and \texttt{T9.3}.
 
 \subsection{Evaluation of the Objective Function Optimization}
 
 % This experiment compares the proposed incremental strategy (\textbf{INCSC}) against the baseline (\textbf{INC}), both using the \textbf{POSE} encoding. 
-% As detailed in Table~\ref{tab:super_master}, both methods converge to identical optimal values (\textbf{Sol}), but \textbf{INCSC} exhibits distinct superiority in execution speed. Fig.~\ref{fig:inc_vs_incsc_bar} visualizes this acceleration for instances requiring over 0.5 seconds. On highly constrained networks (e.g., \texttt{C01}, \texttt{C03}, \texttt{G01}, \texttt{G08}, \texttt{G09}), \textbf{INCSC} reduces solving time by 44\% to 62\% (e.g., 19.14s vs. 215.06s for \texttt{C01}; 38.64s vs. 103.44s for \texttt{G08}). Across the entire benchmark suite, replacing \textbf{INC} with the proposed \textbf{INCSC} strategy successfully reduces the cumulative execution time from 1015.19 seconds down to 599.94 seconds, yielding an overall computational acceleration of approximately 40.90\%.
-This experiment compares POSE+INCSC against POSE+INC. As shown in Table~\ref{tab:super_master}, both methods obtain identical solution values, but POSE+INCSC is generally faster. Fig.~\ref{fig:inc_vs_incsc_bar} further highlights this speedup on selected hard instances.
+This experiment compares POSE+INCSC against two objective-function baselines, POSE+INC and POSE+MaxSAT-RC2. As shown in Table~\ref{tab:appendix_sat_core_preprocess}, these configurations obtain the same reported solution values, while their solving times differ. Fig.~\ref{fig:objective_speedup_lollipop} summarizes the time ratios on the instances with the same reported solution value.
 The advantage is most evident on the harder instances, e.g., \texttt{C01}, \texttt{C03}, \texttt{G01}, \texttt{G08}, and \texttt{G09}, where INCSC reduces solving time by 44\% to 62\%. Across all 35 instances, replacing INC with INCSC reduces the cumulative solving time from 1015.19 seconds to 599.94 seconds, corresponding to an overall reduction of 40.90\%.
 
-This improvement is mainly due to the lighter logical structure of the Sequential Counter encoding, which introduces less overhead than the tree-based \texttt{ITotalizer} encoding. On simpler instances, the difference is marginal, and on infeasible instances both methods show nearly identical solving time because no iterative tightening is required.
+The observed improvement is not uniform across all instances. On simpler instances, the difference is marginal, and on infeasible instances both methods show nearly identical solving time because no iterative tightening is required. Table~\ref{tab:appendix_sat_core_preprocess} reports the SAT configurations used in both the feasibility-encoding and objective-function comparisons.
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=\columnwidth]{image/speedup_lollipop_1col.pdf}
-\caption{Time ratio comparison between POSE+INCSC and POSE+INC on selected hard instances.}
-\label{fig:inc_vs_incsc_bar}
+\includegraphics[width=\columnwidth]{image/objective_speedup_lollipop_combined.pdf}
+\caption{Time ratio comparison between POSE+INCSC and two objective-function baselines, POSE+INC and POSE+MaxSAT-RC2, on instances with the same reported solution value.}
+\label{fig:objective_speedup_lollipop}
 \end{figure}
 
 % This acceleration stems from their differing logical topologies. \textbf{INC} uses the \texttt{ITotalizer}'s binary tree \cite{Martins2014Incremental}, which generates numerous auxiliary variables and heavily burdens unit propagation. Conversely, \textbf{INCSC} employs a streamlined Sequential Counter \cite{Sinz2005}. This flat, ``chain-like'' architecture minimizes structural overhead, providing a direct, highly efficient path for Boolean constraint propagation to prune unpromising branches.
 
-% For simpler instances (e.g., \texttt{C04}, \texttt{T2.1}, \texttt{T9.2}), \textbf{INCSC} occasionally incurs a marginal initialization overhead. However, as shown in Fig.~\ref{fig:inc_vs_incsc_bar}, this fraction-of-a-second delay is negligible given their absolute execution times (under 5 seconds) and is heavily outweighed by the massive gains on large-scale scenarios (with \texttt{G10} being a rare exception). Furthermore, on infeasible networks, execution times remain identical since no incremental bounding iterations occur. Ultimately, \textbf{INCSC} significantly optimizes computational time by streamlining the search space without compromising mathematical rigor.
 
 \subsection{Comparison with State-of-the-Art Exact Solvers}
 
-\begin{table*}[!htbp]
-\centering
-\caption{Comprehensive Comparison between Proposed POSE+INCSC and Baseline Methods}
-\label{tab:super_master}
-\setlength{\tabcolsep}{2.5pt}
-\renewcommand{\arraystretch}{1.05}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{@{}l c ccc ccc ccc ccc ccc ccc ccc@{}}
-\toprule
-\textbf{Inst.} & \textbf{BKS \cite{Gomez2023MO}} & \multicolumn{3}{c}{\textbf{POSE+INCSC}} & \multicolumn{3}{c}{\textbf{POSE+INC}} & \multicolumn{3}{c}{\textbf{DSE+INCSC}} & \multicolumn{3}{c}{\textbf{Gurobi}} & \multicolumn{3}{c}{\textbf{CPLEX-CP}} & \multicolumn{3}{c}{\textbf{CPLEX-MIP}} \\
-\cmidrule(lr){3-5} \cmidrule(lr){6-8} \cmidrule(lr){9-11} \cmidrule(lr){12-14} \cmidrule(lr){15-17} \cmidrule(lr){18-20}
- &  & \textbf{Sol.} & \textbf{Time} & \textbf{Status} & \textbf{Sol.} & \textbf{Time} & \textbf{Status} & \textbf{Sol.} & \textbf{Time} & \textbf{Status} & \textbf{Sol.} & \textbf{Time} & \textbf{Status} & \textbf{Sol.} & \textbf{Time} & \textbf{Status} & \textbf{Sol.} & \textbf{Time} & \textbf{Status} \\
-\midrule
-C01 & 16 & 16 & \textbf{119.14} & OPT & 16 & 215.06 & OPT & 16 & 600.00 & TO & 20 & 600.00 & TO & 16 & 600.00 & TO & 24 & 600.00 & TO \\
-C02 & 14 & 14 & 9.78 & OPT & 14 & 13.86 & OPT & 14 & 600.00 & TO & 14 & \textbf{7.39} & OPT & 14 & 600.00 & TO & 14 & 600.00 & TO \\
-C03 & 14 & 14 & \textbf{65.31} & OPT & 14 & 122.41 & OPT & 14 & 600.00 & TO & 16 & 600.00 & TO & 14 & 600.00 & TO & 18 & 600.00 & TO \\
-C04 & 46 & 46 & 0.10 & OPT & 46 & 0.09 & OPT & 46 & \textbf{0.07} & OPT & 46 & 0.16 & OPT & 46 & 0.22 & OPT & 46 & 0.12 & OPT \\
-C05 & 40 & 40 & \textbf{0.40} & OPT & 40 & 0.42 & OPT & 40 & 0.79 & OPT & 40 & 1.37 & OPT & 40 & 0.73 & OPT & 40 & 1.10 & OPT \\
-C06 & - & - & \textbf{0.22} & INF & - & \textbf{0.22} & INF & - & 0.49 & INF & - & 0.24 & INF & - & 0.24 & INF & - & 0.23 & INF \\
-C07 & - & - & \textbf{0.19} & INF & - & 0.20 & INF & - & 0.72 & INF & - & 0.20 & INF & - & 0.20 & INF & - & 0.20 & INF \\
-C08 & - & - & \textbf{0.27} & INF & - & \textbf{0.27} & INF & - & 1.73 & INF & - & 0.28 & INF & - & 0.28 & INF & - & \textbf{0.27} & INF \\
-C09 & - & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF & - & 0.02 & INF & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF \\
-C10 & - & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF \\
-C11 & 22 & 22 & 16.49 & OPT & 22 & \textbf{16.42} & OPT & 22 & 600.00 & TO & 22 & 198.57 & OPT & 22 & 600.00 & TO & 32 & 600.00 & TO \\
-G01 & 18 & 18 & 66.73 & OPT & 18 & 152.72 & OPT & 18 & 600.00 & TO & 18 & 5.68 & OPT & 18 & 600.00 & TO & 18 & \textbf{2.19} & OPT \\
-G02 & 14 & 14 & \textbf{14.96} & OPT & 14 & 16.95 & OPT & 14 & 600.00 & TO & 14 & 44.70 & OPT & 14 & 600.00 & TO & 14 & 15.97 & OPT \\
-G03 & 20 & 20 & 5.90 & OPT & 20 & \textbf{4.46} & OPT & 20 & 24.10 & OPT & 22 & 600.00 & TO & 20 & 89.41 & OPT & 32 & 600.00 & TO \\
-G04 & 22 & 22 & 12.21 & OPT & 22 & \textbf{10.93} & OPT & 22 & 58.64 & OPT & 44 & 600.00 & TO & 22 & 315.61 & OPT & - & 600.00 & TO \\
-G05 & - & - & \textbf{0.04} & INF & - & \textbf{0.04} & INF & - & 0.09 & INF & - & \textbf{0.04} & INF & - & \textbf{0.04} & INF & - & \textbf{0.04} & INF \\
-G06 & - & - & \textbf{0.09} & INF & - & \textbf{0.09} & INF & - & 0.49 & INF & - & \textbf{0.09} & INF & - & 0.10 & INF & - & \textbf{0.09} & INF \\
-G07 & - & - & 0.01 & INF & - & 0.01 & INF & - & 0.01 & INF & - & \textbf{0.00} & INF & - & 0.01 & INF & - & \textbf{0.00} & INF \\
-G08 & 18 & 18 & \textbf{38.64} & OPT & 18 & 103.44 & OPT & 18 & 600.00 & TO & 18 & 240.57 & OPT & 18 & 600.00 & TO & 22 & 600.00 & TO \\
-G09 & 18 & 18 & \textbf{159.46} & OPT & 18 & 286.23 & OPT & 18 & 600.00 & TO & 26 & 600.00 & TO & 18 & 600.00 & TO & 28 & 600.00 & TO \\
-G10 & 22 & 22 & 60.55 & OPT & 22 & \textbf{40.94} & OPT & 22 & 600.00 & TO & - & 600.00 & TO & 22 & 600.00 & TO & - & 600.00 & TO \\
-G11 & - & - & \textbf{0.15} & INF & - & \textbf{0.15} & INF & - & 0.98 & INF & - & \textbf{0.15} & INF & - & \textbf{0.15} & INF & - & 0.16 & INF \\
-G12 & - & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF & - & 0.02 & INF & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF \\
-G13 & - & - & \textbf{0.24} & INF & - & \textbf{0.24} & INF & - & 1.45 & INF & - & \textbf{0.24} & INF & - & 0.25 & INF & - & \textbf{0.24} & INF \\
-G14 & 8 & 8 & 8.64 & OPT & 8 & \textbf{8.49} & OPT & 8 & 106.29 & OPT & 8 & 456.71 & OPT & 10 & 600.00 & TO & 16 & 600.00 & TO \\
-T2.1 & 12 & 12 & 2.74 & OPT & 12 & \textbf{1.75} & OPT & 12 & 42.02 & OPT & 12 & 14.22 & OPT & 12 & 600.00 & TO & 12 & 12.34 & OPT \\
-T2.2 & 46 & 46 & \textbf{0.08} & OPT & 46 & \textbf{0.08} & OPT & 46 & 0.26 & OPT & 46 & 0.09 & OPT & 46 & 0.12 & OPT & 46 & 0.09 & OPT \\
-T2.3 & 14 & 14 & 1.13 & OPT & 14 & \textbf{1.11} & OPT & 14 & 8.00 & OPT & 14 & 15.13 & OPT & 14 & 455.48 & OPT & 14 & 345.36 & OPT \\
-T2.4 & 20 & 20 & \textbf{0.09} & OPT & 20 & \textbf{0.09} & OPT & 20 & 0.25 & OPT & 20 & 0.20 & OPT & 20 & 0.16 & OPT & 20 & 0.16 & OPT \\
-T2.5 & - & - & \textbf{0.05} & INF & - & \textbf{0.05} & INF & - & 0.29 & INF & - & \textbf{0.05} & INF & - & \textbf{0.05} & INF & - & \textbf{0.05} & INF \\
-T9.1 & 18 & 18 & \textbf{10.87} & OPT & 18 & 13.07 & OPT & 18 & 58.76 & OPT & - & 600.00 & TO & 22 & 600.00 & TO & 46 & 600.00 & TO \\
-T9.2 & 48 & 48 & 0.34 & OPT & 48 & \textbf{0.33} & OPT & 48 & 0.86 & OPT & 48 & 0.37 & OPT & 48 & 0.48 & OPT & 48 & 0.35 & OPT \\
-T9.3 & 24 & 24 & 4.40 & OPT & 24 & \textbf{4.36} & OPT & 24 & 15.68 & OPT & - & 600.00 & TO & 24 & 35.65 & OPT & 46 & 600.00 & TO \\
-T9.4 & 26 & 26 & 0.51 & OPT & 26 & \textbf{0.50} & OPT & 26 & 1.08 & OPT & 26 & 0.73 & OPT & 26 & 0.79 & OPT & 26 & 0.62 & OPT \\
-T9.5 & - & - & \textbf{0.18} & INF & - & \textbf{0.18} & INF & - & 0.24 & INF & - & 0.19 & INF & - & 0.19 & INF & - & 0.19 & INF \\
-\midrule
-\textbf{Total} & - & - & \textbf{599.94} & - & - & 1015.19 & - & - & 5723.34 & - & - & 5787.40 & - & - & 8100.19 & - & - & 7579.80 & - \\
-\#OPT & - & - & - & \textbf{22} & - & - & \textbf{22} & - & - & 13 & - & - & 14 & - & - & 10 & - & - & 10 \\
-\#INF & - & - & - & 13 & - & - & 13 & - & - & 13 & - & - & 13 & - & - & 13 & - & - & 13 \\
-\#TO & - & - & - & \textbf{0} & - & - & \textbf{0} & - & - & 9 & - & - & 8 & - & - & 12 & - & - & 12 \\
-\bottomrule
-\multicolumn{20}{l}{\footnotesize \textbf{BKS}: Best known solution reported in \cite{Gomez2023MO}; \textbf{OPT}: Optimal; \textbf{INF}: Infeasible; \textbf{TO}: Timeout; \textbf{\#}: Number of instances.}
-\end{tabular}%
-}
-\end{table*}
-% Finally, the proposed approach is benchmarked against leading commercial exact solvers, specifically Gurobi, CPLEX-CP, and CPLEX-MIP. The detailed results in Table~\ref{tab:super_master}, further visualized by the runtime distribution in Fig.~\ref{fig:sota_cactus}, unequivocally demonstrate the superiority of combining the POSE encoding with the INCSC strategy over traditional optimization technologies. Crucially, for all 22 satisfiable instances, the objective values obtained by POSE+INCSC are strictly identical to the Best Known Solutions (BKS) reported in recent literature \cite{Gomez2023MO}, thereby definitively validating the mathematical correctness and reliability of the proposed exact encoding.
+% \begin{table*}[!htbp]
+% \centering
+% \caption{Comprehensive Comparison between Proposed POSE+INCSC and Baseline Methods}
+% \setlength{\tabcolsep}{2.5pt}
+% \renewcommand{\arraystretch}{1.05}
+% \resizebox{\textwidth}{!}{%
+% \begin{tabular}{@{}l c ccc ccc ccc ccc ccc ccc ccc@{}}
+% \toprule
+% \textbf{Inst.} & \textbf{BKS \cite{Gomez2023MO}} & \multicolumn{3}{c}{\textbf{POSE+INCSC}} & \multicolumn{3}{c}{\textbf{POSE+INC}} & \multicolumn{3}{c}{\textbf{DSE+INCSC}} & \multicolumn{3}{c}{\textbf{Gurobi}} & \multicolumn{3}{c}{\textbf{CPLEX-CP}} & \multicolumn{3}{c}{\textbf{CPLEX-MIP}} \\
+% \cmidrule(lr){3-5} \cmidrule(lr){6-8} \cmidrule(lr){9-11} \cmidrule(lr){12-14} \cmidrule(lr){15-17} \cmidrule(lr){18-20}
+%  &  & \textbf{Sol.} & \textbf{Time} & \textbf{Status} & \textbf{Sol.} & \textbf{Time} & \textbf{Status} & \textbf{Sol.} & \textbf{Time} & \textbf{Status} & \textbf{Sol.} & \textbf{Time} & \textbf{Status} & \textbf{Sol.} & \textbf{Time} & \textbf{Status} & \textbf{Sol.} & \textbf{Time} & \textbf{Status} \\
+% \midrule
+% C01 & 16 & 16 & \textbf{119.14} & OPT & 16 & 215.06 & OPT & 16 & 600.00 & TO & 20 & 600.00 & TO & 16 & 600.00 & TO & 24 & 600.00 & TO \\
+% C02 & 14 & 14 & 9.78 & OPT & 14 & 13.86 & OPT & 14 & 600.00 & TO & 14 & \textbf{7.39} & OPT & 14 & 600.00 & TO & 14 & 600.00 & TO \\
+% C03 & 14 & 14 & \textbf{65.31} & OPT & 14 & 122.41 & OPT & 14 & 600.00 & TO & 16 & 600.00 & TO & 14 & 600.00 & TO & 18 & 600.00 & TO \\
+% C04 & 46 & 46 & 0.10 & OPT & 46 & 0.09 & OPT & 46 & \textbf{0.07} & OPT & 46 & 0.16 & OPT & 46 & 0.22 & OPT & 46 & 0.12 & OPT \\
+% C05 & 40 & 40 & \textbf{0.40} & OPT & 40 & 0.42 & OPT & 40 & 0.79 & OPT & 40 & 1.37 & OPT & 40 & 0.73 & OPT & 40 & 1.10 & OPT \\
+% C06 & - & - & \textbf{0.22} & INF & - & \textbf{0.22} & INF & - & 0.49 & INF & - & 0.24 & INF & - & 0.24 & INF & - & 0.23 & INF \\
+% C07 & - & - & \textbf{0.19} & INF & - & 0.20 & INF & - & 0.72 & INF & - & 0.20 & INF & - & 0.20 & INF & - & 0.20 & INF \\
+% C08 & - & - & \textbf{0.27} & INF & - & \textbf{0.27} & INF & - & 1.73 & INF & - & 0.28 & INF & - & 0.28 & INF & - & \textbf{0.27} & INF \\
+% C09 & - & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF & - & 0.02 & INF & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF \\
+% C10 & - & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF \\
+% C11 & 22 & 22 & 16.49 & OPT & 22 & \textbf{16.42} & OPT & 22 & 600.00 & TO & 22 & 198.57 & OPT & 22 & 600.00 & TO & 32 & 600.00 & TO \\
+% G01 & 18 & 18 & 66.73 & OPT & 18 & 152.72 & OPT & 18 & 600.00 & TO & 18 & 5.68 & OPT & 18 & 600.00 & TO & 18 & \textbf{2.19} & OPT \\
+% G02 & 14 & 14 & \textbf{14.96} & OPT & 14 & 16.95 & OPT & 14 & 600.00 & TO & 14 & 44.70 & OPT & 14 & 600.00 & TO & 14 & 15.97 & OPT \\
+% G03 & 20 & 20 & 5.90 & OPT & 20 & \textbf{4.46} & OPT & 20 & 24.10 & OPT & 22 & 600.00 & TO & 20 & 89.41 & OPT & 32 & 600.00 & TO \\
+% G04 & 22 & 22 & 12.21 & OPT & 22 & \textbf{10.93} & OPT & 22 & 58.64 & OPT & 44 & 600.00 & TO & 22 & 315.61 & OPT & - & 600.00 & TO \\
+% G05 & - & - & \textbf{0.04} & INF & - & \textbf{0.04} & INF & - & 0.09 & INF & - & \textbf{0.04} & INF & - & \textbf{0.04} & INF & - & \textbf{0.04} & INF \\
+% G06 & - & - & \textbf{0.09} & INF & - & \textbf{0.09} & INF & - & 0.49 & INF & - & \textbf{0.09} & INF & - & 0.10 & INF & - & \textbf{0.09} & INF \\
+% G07 & - & - & 0.01 & INF & - & 0.01 & INF & - & 0.01 & INF & - & \textbf{0.00} & INF & - & 0.01 & INF & - & \textbf{0.00} & INF \\
+% G08 & 18 & 18 & \textbf{38.64} & OPT & 18 & 103.44 & OPT & 18 & 600.00 & TO & 18 & 240.57 & OPT & 18 & 600.00 & TO & 22 & 600.00 & TO \\
+% G09 & 18 & 18 & \textbf{159.46} & OPT & 18 & 286.23 & OPT & 18 & 600.00 & TO & 26 & 600.00 & TO & 18 & 600.00 & TO & 28 & 600.00 & TO \\
+% G10 & 22 & 22 & 60.55 & OPT & 22 & \textbf{40.94} & OPT & 22 & 600.00 & TO & - & 600.00 & TO & 22 & 600.00 & TO & - & 600.00 & TO \\
+% G11 & - & - & \textbf{0.15} & INF & - & \textbf{0.15} & INF & - & 0.98 & INF & - & \textbf{0.15} & INF & - & \textbf{0.15} & INF & - & 0.16 & INF \\
+% G12 & - & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF & - & 0.02 & INF & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF & - & \textbf{0.01} & INF \\
+% G13 & - & - & \textbf{0.24} & INF & - & \textbf{0.24} & INF & - & 1.45 & INF & - & \textbf{0.24} & INF & - & 0.25 & INF & - & \textbf{0.24} & INF \\
+% G14 & 8 & 8 & 8.64 & OPT & 8 & \textbf{8.49} & OPT & 8 & 106.29 & OPT & 8 & 456.71 & OPT & 10 & 600.00 & TO & 16 & 600.00 & TO \\
+% T2.1 & 12 & 12 & 2.74 & OPT & 12 & \textbf{1.75} & OPT & 12 & 42.02 & OPT & 12 & 14.22 & OPT & 12 & 600.00 & TO & 12 & 12.34 & OPT \\
+% T2.2 & 46 & 46 & \textbf{0.08} & OPT & 46 & \textbf{0.08} & OPT & 46 & 0.26 & OPT & 46 & 0.09 & OPT & 46 & 0.12 & OPT & 46 & 0.09 & OPT \\
+% T2.3 & 14 & 14 & 1.13 & OPT & 14 & \textbf{1.11} & OPT & 14 & 8.00 & OPT & 14 & 15.13 & OPT & 14 & 455.48 & OPT & 14 & 345.36 & OPT \\
+% T2.4 & 20 & 20 & \textbf{0.09} & OPT & 20 & \textbf{0.09} & OPT & 20 & 0.25 & OPT & 20 & 0.20 & OPT & 20 & 0.16 & OPT & 20 & 0.16 & OPT \\
+% T2.5 & - & - & \textbf{0.05} & INF & - & \textbf{0.05} & INF & - & 0.29 & INF & - & \textbf{0.05} & INF & - & \textbf{0.05} & INF & - & \textbf{0.05} & INF \\
+% T9.1 & 18 & 18 & \textbf{10.87} & OPT & 18 & 13.07 & OPT & 18 & 58.76 & OPT & - & 600.00 & TO & 22 & 600.00 & TO & 46 & 600.00 & TO \\
+% T9.2 & 48 & 48 & 0.34 & OPT & 48 & \textbf{0.33} & OPT & 48 & 0.86 & OPT & 48 & 0.37 & OPT & 48 & 0.48 & OPT & 48 & 0.35 & OPT \\
+% T9.3 & 24 & 24 & 4.40 & OPT & 24 & \textbf{4.36} & OPT & 24 & 15.68 & OPT & - & 600.00 & TO & 24 & 35.65 & OPT & 46 & 600.00 & TO \\
+% T9.4 & 26 & 26 & 0.51 & OPT & 26 & \textbf{0.50} & OPT & 26 & 1.08 & OPT & 26 & 0.73 & OPT & 26 & 0.79 & OPT & 26 & 0.62 & OPT \\
+% T9.5 & - & - & \textbf{0.18} & INF & - & \textbf{0.18} & INF & - & 0.24 & INF & - & 0.19 & INF & - & 0.19 & INF & - & 0.19 & INF \\
+% \midrule
+% \textbf{Total} & - & - & \textbf{599.94} & - & - & 1015.19 & - & - & 5723.34 & - & - & 5787.40 & - & - & 8100.19 & - & - & 7579.80 & - \\
+% \#OPT & - & - & - & \textbf{22} & - & - & \textbf{22} & - & - & 13 & - & - & 14 & - & - & 10 & - & - & 10 \\
+% \#INF & - & - & - & 13 & - & - & 13 & - & - & 13 & - & - & 13 & - & - & 13 & - & - & 13 \\
+% \#TO & - & - & - & \textbf{0} & - & - & \textbf{0} & - & - & 9 & - & - & 8 & - & - & 12 & - & - & 12 \\
+% \bottomrule
+% \multicolumn{20}{l}{\footnotesize \textbf{BKS}: Best known solution reported in \cite{Gomez2023MO}; \textbf{OPT}: Optimal; \textbf{INF}: Infeasible; \textbf{TO}: Timeout; \textbf{\#}: Number of instances.}
+% \end{tabular}%
+% }
+% \end{table*}
 
 % Regarding overall convergence, the proposed method successfully solves and mathematically certifies all 35 instances (a 100\% success rate). In stark contrast, the baseline commercial solvers exhibit severe scalability limitations on these densely constrained networks. As evidenced by the early termination of their respective curves in Fig.~\ref{fig:sota_cactus}, CPLEX-CP and CPLEX-MIP solve only 23 instances (65.71\%), timing out (\texttt{TO}) on 12 test cases. Gurobi performs marginally better but still fails on 8 demanding instances (77.14\% success rate). The ability of POSE+INCSC to consistently certify the global optimum (\texttt{OPT}) highlights its profound stability and robustness, particularly on challenging instances (e.g., \texttt{C01}--\texttt{C03}, \texttt{G08}--\texttt{G10}) where commercial solvers become entirely intractable.
 
@@ -819,18 +992,18 @@ T9.5 & - & - & \textbf{0.18} & INF & - & \textbf{0.18} & INF & - & 0.24 & INF & 
 % While CPLEX-CP occasionally found the optimal bound (e.g., \texttt{C01}, \texttt{C03}, \texttt{T9.3}) before timing out, which indicates a bottleneck primarily in the proof phase rather than the search phase, both CPLEX-MIP and Gurobi suffered severe performance degradation.
 % For example, on \texttt{T9.1}, CPLEX-MIP returned a sub-optimal bound more than twice as large as the true optimum (46 vs. 18). More problematically, Gurobi completely failed to formulate even a single feasible solution (\texttt{N/A}) for highly constrained networks such as \texttt{G10}, \texttt{T9.1}, and \texttt{T9.3}, and returned heavily sub-optimal allocations for others like \texttt{G09}. Aggregating the solution quality, POSE+INCSC successfully secured and certified all 22 possible optimal solutions, leaving Gurobi (14 \texttt{OPT}) and the CPLEX variants (10 \texttt{OPT} each) significantly behind. These results demonstrate that POSE+INCSC not only scales better but consistently guarantees mathematically optimal allocations where commercial MIP/CP architectures break down.
 
-Finally, POSE+INCSC is compared with Gurobi, CPLEX-CP, and CPLEX-MIP. Table~\ref{tab:super_master} summarizes the numerical results, while Figs.~\ref{fig:sota_cactus} and~\ref{fig:solution_quality} highlight the differences in solving time and solution quality. 
+Finally, POSE+INCSC is compared with Gurobi, CPLEX-CP, CPLEX-MIP, and CP-SAT. Table~\ref{tab:appendix_solver_baselines_preprocess} summarizes these solver results and includes EvalMaxSAT as an additional MaxSAT baseline, while Figs.~\ref{fig:sota_cactus} and~\ref{fig:solution_quality} highlight the differences in solving time and solution quality. 
 % For all 22 satisfiable instances, POSE+INCSC matches the Best Known Solutions (BKS) reported in \cite{Gomez2023MO}, supporting the correctness of the proposed exact encoding.
 % POSE+INCSC certifies optimality for 22 out of 35 instances, matching the Best Known Solutions (BKS) reported in \cite{Gomez2023MO}. The remaining 13 instances are proven to be infeasible under the considered bounds, further confirming the correctness of the proposed exact encoding.
 
-POSE+INCSC solves and certifies all 35 instances within the 600-second limit, with the longest runtime of approximately 160 seconds (\texttt{G09}). In contrast, CPLEX-CP and CPLEX-MIP solve only 23 instances and times out on 12, while Gurobi solves 27 instances and times out on 8. This gap is also visible in Fig.~\ref{fig:sota_cactus}, where the curve of POSE+INCSC extends further to the right than those of the commercial solvers.
+POSE+INCSC solves and certifies all 35 instances within the 600-second limit, with the longest runtime of approximately 160 seconds (\texttt{G09}). Among the baselines, CP-SAT is the strongest, solving 33 instances and timing out on 2. Gurobi solves 27 instances and times out on 8, whereas CPLEX-CP and CPLEX-MIP solve 23 instances and time out on 12. This gap is also visible in Fig.~\ref{fig:sota_cactus}, where the curve of POSE+INCSC extends further to the right than those of the baseline solvers.
 For the 22 satisfiable instances, POSE+INCSC matches the Best Known Solutions (BKS) reported in \cite{Gomez2023MO}, further supporting the correctness of the proposed exact encoding.
 
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.95\columnwidth ]{image/sota_cactus_plot.pdf}
 % \caption{Cactus plot comparing the overall performance of the proposed POSE+INCSC against Gurobi, CPLEX-CP, and CPLEX-MIP. The x-axis represents the number of successfully solved instances (OPT/INF before timeout), and the y-axis shows the required solving time in a logarithmic scale. A curve extending further to the right and staying lower indicates superior solver performance.}
-\caption{Cactus plot comparing the solving time of POSE+INCSC, Gurobi, CPLEX-CP, and CPLEX-MIP on the 35 benchmark instances.}
+\caption{Cactus plot comparing the solving time of POSE+INCSC, Gurobi, CPLEX-CP, CPLEX-MIP, and CP-SAT on the 35 benchmark instances.}
 \label{fig:sota_cactus}
 \end{figure}
 
@@ -838,13 +1011,13 @@ For the 22 satisfiable instances, POSE+INCSC matches the Best Known Solutions (B
 \centering
 \includegraphics[width=0.95\columnwidth]{image/solution_quality_bar.pdf}
 % \caption{Solution quality comparison (objective value) on selected hard instances where baseline commercial solvers exceeded the 600s time limit. Lower values indicate a better solution (fewer frequencies used). Stars ($\star$) denote the optimal value achieved among the shown solvers for that instance. POSE+INCSC consistently achieves optimality in all cases, whereas commercial solvers (Gurobi, CPLEX-CP, CPLEX-MIP) frequently return sub-optimal bounds or fail to find any feasible solution (denoted as N/A) upon timeout.}
-\caption{Solution quality comparison on selected hard instances where the commercial solvers exceed the time limit. Lower values indicate better solutions.}
+\caption{Solution quality comparison on selected hard instances where at least one baseline solver exceeds the time limit or reports a different solution value. Lower values indicate better solutions.}
 \label{fig:solution_quality}
 \end{figure}
 
-In terms of execution efficiency, POSE+INCSC requires 599.94 seconds of penalized cumulative solving time across all 35 instances (with each Timeout (TO) instance counted as 600 seconds), compared with 5787.40 seconds for Gurobi and more than 7500 seconds for the CPLEX variants. On difficult cases such as \texttt{T9.1} and \texttt{T9.3}, POSE+INCSC proves optimality in 10.87s and 4.40s, whereas the commercial solvers hit the 600-second limit. On infeasible instances, POSE+INCSC is typically below 0.3s.
+In terms of execution efficiency, POSE+INCSC requires 599.94 seconds of penalized cumulative solving time across all 35 instances, where each timeout is counted as 600 seconds. The corresponding values are 2228.96 seconds for CP-SAT, 5787.40 seconds for Gurobi, and more than 7500 seconds for the CPLEX variants. On difficult cases such as \texttt{T9.1} and \texttt{T9.3}, POSE+INCSC proves optimality in 10.87s and 4.40s, whereas Gurobi, CPLEX-CP, and CPLEX-MIP hit the 600-second limit. CP-SAT is more competitive on these cases but still does not certify all satisfiable instances. On infeasible instances, POSE+INCSC is typically below 0.3s.
 
-The difference in solution quality is most visible on the hard instances where the commercial solvers fail to certify optimality. CPLEX-CP occasionally reaches the optimal bound before timing out (e.g., \texttt{C01}, \texttt{C03}, and \texttt{T9.3}), indicating that its main bottleneck lies in the proof phase. In contrast, CPLEX-MIP and Gurobi often return weaker bounds or no feasible solution at all. For example, on \texttt{T9.1}, CPLEX-MIP returns 46 while the certified optimum is 18, and Gurobi fails to find any feasible solution on instances such as \texttt{G10}, \texttt{T9.1}, and \texttt{T9.3}. Overall, POSE+INCSC certifies all 22 optimal solutions, whereas Gurobi certifies 14 and both CPLEX variants certify 10.
+The difference in solution quality is most visible on the hard instances where the baseline solvers fail to certify optimality. CP-SAT often finds the same solution value as POSE+INCSC, but it still times out on two satisfiable instances. CPLEX-CP occasionally reaches the optimal bound before timing out (e.g., \texttt{C01}, \texttt{C03}, and \texttt{T9.3}), indicating that its main bottleneck lies in the proof phase. In contrast, CPLEX-MIP and Gurobi often return weaker bounds or no feasible solution at all. For example, on \texttt{T9.1}, CPLEX-MIP returns 46 while the certified optimum is 18, and Gurobi fails to find any feasible solution on instances such as \texttt{G10}, \texttt{T9.1}, and \texttt{T9.3}. Overall, POSE+INCSC certifies all 22 optimal solutions, whereas CP-SAT certifies 20, Gurobi certifies 14, and both CPLEX variants certify 10.
 
 
 
@@ -905,6 +1078,9 @@ The difference in solution quality is most visible on the hard instances where t
 % \end{tabular}
 % \end{table}
 
+\input{../SourceCode/visualize/tables/appendix_sat_core_preprocess.tex}
+\input{../SourceCode/visualize/tables/appendix_solver_baselines_preprocess.tex}
+
 \section{Conclusion}
 \label{sec:conclusion}
 % This paper presents an exact SAT-based framework for solving and certifying optimality in the Minimum Order Frequency Assignment Problem (MO-FAP). The proposed approach is built upon two main components. First, the order-based SAT encoding (POSE) transforms pairwise interference constraints into compact interval-based logical constraints, significantly reducing the size of the search space. Second, the incremental SAT strategy (INCSC), based on Sequential Counter encoding and assumptions, enables efficient reuse of learned clauses across iterations without reconstructing the formula.
@@ -920,11 +1096,13 @@ Future work will extend the proposed framework to other FAP variants and real-wo
 \label{sec:data_code_availability}
 The source code and benchmark data used in this study are publicly available at: \url{https://github.com/dev2points/Min-Order-Frequency-Assignment-Problem}.
 
+% \appendices
+
 % \balance
 % \enlargethispage{2\baselineskip}
 \bibliographystyle{IEEEtran}
 \bibliography{reference}
-\vfill\eject
+% \vfill\eject
 % \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{image/Nghia_Dao_Xuan.jpg}}]{Nghia Dao Xuan} 
 % received the B.Sc. degree in Computer Science from the University of Engineering and Technology, Vietnam National University, Hanoi, Vietnam. He is currently pursuing the M.Sc. degree at VNU-UET. His primary research interests include combinatorial optimization, Boolean Satisfiability (SAT), and resource allocation in telecommunication networks.
 % \end{IEEEbiography}
@@ -940,11 +1118,9 @@ The source code and benchmark data used in this study are publicly available at:
 \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{image/Nghia_Dao_Xuan.jpg}}]{Nghia Dao Xuan}
 received the B.Sc. degree in computer science from VNU University of Engineering and Technology, Hanoi, Vietnam, where he is currently pursuing the M.Sc. degree. His research interests include combinatorial optimization, SAT, and telecommunication resource allocation.
 \end{IEEEbiography}
-
 \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{image/Phuong_Dang_Anh.jpg}}]{Phuong Dang Anh}
 is an undergraduate student in information technology at VNU University of Engineering and Technology, Hanoi, Vietnam. His research interests include combinatorial optimization and SAT-based exact methods.
 \end{IEEEbiography}
-
 \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{image/Khanh_To_Van.jpg}}]{Khanh To Van}
 received the B.Sc. and M.Sc. degrees from the University of Engineering and Technology, Vietnam National University, Hanoi, Vietnam, in 2004 and 2007, respectively. He earned the Ph.D. degree in Information Science from the Japan Advanced Institute of Science and Technology (JAIST), Ishikawa, Japan, in 2013, where his doctoral research focused on SAT and SMT solving. His research interests include formal methods in software engineering and the development of efficient logical encodings for combinatorial optimization and operations research problems, with a particular emphasis on SAT solving.
 \end{IEEEbiography}
